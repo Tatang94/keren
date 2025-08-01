@@ -100,7 +100,7 @@ export default function Home() {
                   size="lg"
                 >
                   <ShoppingCart className="mr-2 h-5 w-5" />
-                  Lihat Produk
+                  <span>Lihat Produk</span>
                 </Button>
               </div>
             </div>

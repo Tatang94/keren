@@ -27,7 +27,7 @@ export default function ChatInterface({ isOpen, onClose, onProductSelect }: Chat
     {
       id: '1',
       type: 'ai',
-      message: 'Halo! Saya PPOB Assistant yang siap membantu pembelian produk digital Anda.\n\nContoh perintah:\n• "Beli pulsa Telkomsel 50rb untuk 081234567890"\n• "Token listrik 100rb meter 12345678901"\n• "Top up GoPay 200rb ke 081234567890"\n\nKetik perintah Anda...',
+      message: 'Halo! Saya PPOB Assistant yang siap membantu pembelian produk digital Anda.\n\nContoh perintah:\n• "Beli pulsa Telkomsel 50rb untuk 081234567890"\n• "Token listrik PLN 100rb meter 12345678901"\n• "Top up GoPay 200rb ke 081234567890"\n• "Voucher Mobile Legends 100rb untuk 081234567890"\n\nKetik perintah Anda...',
       timestamp: new Date()
     }
   ]);
@@ -154,10 +154,10 @@ export default function ChatInterface({ isOpen, onClose, onProductSelect }: Chat
               </div>
               <div className="ml-4">
                 <DialogTitle className="text-lg font-semibold">AI Assistant PPOB</DialogTitle>
-                <p className="text-sm text-green-500 flex items-center">
+                <span className="text-sm text-green-500 flex items-center">
                   <div className="w-2 h-2 bg-green-500 rounded-full mr-1"></div>
                   Siap membantu Anda
-                </p>
+                </span>
               </div>
             </div>
             <Button variant="ghost" size="icon" onClick={onClose}>

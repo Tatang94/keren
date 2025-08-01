@@ -74,7 +74,7 @@ export async function generateOrderConfirmation(
   adminFee: number
 ): Promise<string> {
   try {
-    const prompt = `Buatkan konfirmasi pembelian yang singkat, jelas, dan profesional dalam bahasa Indonesia untuk:
+    const prompt = `Buatkan konfirmasi pembelian yang singkat dan profesional dalam bahasa Indonesia untuk:
 
 Produk: ${productName}
 Nomor tujuan: ${targetNumber}
@@ -82,12 +82,11 @@ Harga: Rp ${amount.toLocaleString('id-ID')}
 Biaya admin: Rp ${adminFee.toLocaleString('id-ID')}
 Total: Rp ${(amount + adminFee).toLocaleString('id-ID')}
 
-Format yang diinginkan:
-- Konfirmasi singkat dan jelas
-- Tampilkan detail produk, nomor, dan total pembayaran
-- Akhiri dengan konfirmasi untuk melanjutkan pembayaran
-- JANGAN buat multiple pilihan/variasi
-- Gunakan bahasa yang ramah namun profesional
+PENTING: 
+- Gunakan kata perintah yang konsisten dengan contoh: "Beli pulsa", "Token listrik PLN", "Top up", "Voucher"
+- Respons maksimal 3-4 baris saja
+- Format: konfirmasi singkat + detail + total + instruksi lanjut
+- Jangan gunakan emoji atau variasi berlebihan
 
 Buatlah konfirmasi yang ramah dan jelas, minta konfirmasi untuk melanjutkan pembayaran.`;
 

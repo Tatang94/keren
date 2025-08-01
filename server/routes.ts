@@ -125,14 +125,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (parsedOrder.confidence === 0) {
         return res.json({
           success: false,
-          message: "Maaf, saya hanya dapat membantu dengan pembelian produk digital PPOB seperti pulsa, token listrik, game voucher, dan top up e-wallet.\n\nContoh perintah:\n• Beli pulsa Telkomsel 50rb untuk 081234567890\n• Token listrik 100rb meter 12345678901\n• Top up GoPay 200rb ke 081234567890"
+          message: "Maaf, saya hanya dapat membantu dengan pembelian produk digital PPOB seperti pulsa, token listrik, game voucher, dan top up e-wallet.\n\nContoh perintah:\n• Beli pulsa Telkomsel 50rb untuk 081234567890\n• Token listrik PLN 100rb meter 12345678901\n• Top up GoPay 200rb ke 081234567890\n• Voucher Mobile Legends 100rb untuk 081234567890"
         });
       }
       
       if (parsedOrder.confidence < 0.7) {
         return res.json({
           success: false,
-          message: "Perintah kurang jelas. Silakan gunakan format yang lebih spesifik:\n\nContoh:\n• Beli pulsa [provider] [nominal] untuk [nomor]\n• Token listrik [nominal] meter [nomor meter]\n• Top up [e-wallet] [nominal] ke [nomor]"
+          message: "Perintah kurang jelas. Silakan gunakan format yang lebih spesifik:\n\nContoh:\n• Beli pulsa [provider] [nominal] untuk [nomor]\n• Token listrik PLN [nominal] meter [nomor meter]\n• Top up [e-wallet] [nominal] ke [nomor]\n• Voucher [game] [nominal] untuk [nomor]"
         });
       }
 
