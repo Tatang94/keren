@@ -104,60 +104,42 @@ export default function Home() {
                 </Button>
               </div>
             </div>
-            <div className="relative pointer-events-none">
-              {/* AI Chat Interface Preview - Non-clickable */}
+            <div className="relative">
+              {/* Features Preview */}
               <Card className="bg-white text-gray-800 shadow-2xl">
-                <CardContent className="p-6">
-                  <div className="flex items-center mb-4">
-                    <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
-                      <Bot className="text-white h-5 w-5" />
+                <CardContent className="p-8">
+                  <div className="text-center mb-6">
+                    <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Bot className="text-white h-8 w-8" />
                     </div>
-                    <div className="ml-3">
-                      <p className="font-semibold">AI Assistant PPOB</p>
-                      <div className="flex items-center text-sm text-green-500">
-                        <div className="w-2 h-2 bg-green-500 rounded-full mr-1"></div>
-                        Online
-                      </div>
+                    <h3 className="text-xl font-bold mb-2">AI Powered PPOB</h3>
+                    <p className="text-gray-600">Transaksi dengan perintah natural</p>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4 mb-6">
+                    <div className="text-center p-4 bg-blue-50 rounded-lg">
+                      <MessageCircle className="h-6 w-6 text-primary mx-auto mb-2" />
+                      <p className="text-sm font-medium">Chat AI</p>
+                      <p className="text-xs text-gray-600">Perintah natural</p>
+                    </div>
+                    <div className="text-center p-4 bg-green-50 rounded-lg">
+                      <ShoppingCart className="h-6 w-6 text-green-600 mx-auto mb-2" />
+                      <p className="text-sm font-medium">1000+ Produk</p>
+                      <p className="text-xs text-gray-600">Digital terlengkap</p>
                     </div>
                   </div>
-                  <div className="space-y-4 mb-4">
-                    <div className="flex">
-                      <div className="bg-gray-100 rounded-lg px-4 py-2 max-w-xs">
-                        <p className="text-sm">
-                          Halo! Saya dapat membantu Anda membeli pulsa, token listrik, dan produk digital lainnya. 
-                          Coba katakan: "Beli pulsa Telkomsel 50rb untuk 081234567890"
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex justify-end">
-                      <div className="bg-primary text-white rounded-lg px-4 py-2 max-w-xs">
-                        <p className="text-sm">Beli token listrik 100rb untuk 12345678901</p>
-                      </div>
-                    </div>
-                    <div className="flex">
-                      <div className="bg-gray-100 rounded-lg px-4 py-2 max-w-xs">
-                        <p className="text-sm">
-                          Baik! Saya akan memproses pembelian token listrik PLN 100.000 untuk nomor meter 12345678901. 
-                          Total pembayaran Rp 101.500. Lanjutkan ke pembayaran?
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-2 border-t pt-4">
-                    <input 
-                      type="text" 
-                      placeholder="Ketik perintah pembelian..."
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm bg-gray-50"
-                      disabled
-                      readOnly
-                    />
-                    <Button size="sm" disabled className="bg-primary opacity-70">
-                      <Bot className="h-4 w-4" />
+                  
+                  <div className="text-center">
+                    <Button 
+                      onClick={() => setShowChat(true)}
+                      className="w-full bg-primary hover:bg-blue-700"
+                    >
+                      <Bot className="mr-2 h-4 w-4" />
+                      Coba Chat AI Sekarang
                     </Button>
                   </div>
                 </CardContent>
               </Card>
-              <div className="absolute inset-0 bg-transparent"></div>
             </div>
           </div>
         </div>
