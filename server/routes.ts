@@ -18,6 +18,86 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Sync products from Digiflazz
+  app.post("/api/admin/sync-products", async (req, res) => {
+    try {
+      const digiflazzProducts = await digiflazzService.getProducts();
+      
+      // Clear existing products and sync new ones
+      for (const dfProduct of digiflazzProducts.slice(0, 50)) { // Limit to first 50 for testing
+        if (dfProduct.status === 'available') {
+          const category = mapDigiflazzCategory(dfProduct.category);
+          const provider = mapDigiflazzBrand(dfProduct.brand);
+          
+          const product = {
+            category: category,
+            provider: provider.toLowerCase(),
+            name: dfProduct.product_name,
+            price: dfProduct.price,
+            adminFee: calculateAdminFee(dfProduct.price),
+            isActive: true
+          };
+          
+          await storage.createProduct({
+            ...product,
+            id: dfProduct.buyer_sku_code
+          });
+        }
+      }
+      
+      res.json({ 
+        success: true, 
+        message: `Synced ${digiflazzProducts.length} products from Digiflazz`,
+        count: digiflazzProducts.length
+      });
+    } catch (error) {
+      console.error('Sync error:', error);
+      res.status(500).json({ error: "Failed to sync products from Digiflazz" });
+    }
+  });
+
+  function mapDigiflazzCategory(dfCategory: string): string {
+    const categoryMap: Record<string, string> = {
+      'Pulsa': 'pulsa',
+      'Paket Data': 'pulsa', 
+      'PLN': 'token_listrik',
+      'Token Listrik': 'token_listrik',
+      'Games': 'game_voucher',
+      'Voucher Game': 'game_voucher',
+      'E-Money': 'ewallet',
+      'E-Wallet': 'ewallet'
+    };
+    return categoryMap[dfCategory] || 'pulsa';
+  }
+
+  function mapDigiflazzBrand(dfBrand: string): string {
+    const brandMap: Record<string, string> = {
+      'TELKOMSEL': 'telkomsel',
+      'INDOSAT': 'indosat', 
+      'XL AXIATA': 'xl',
+      'TRI': 'tri',
+      'SMARTFREN': 'smartfren',
+      'AXIS': 'axis',
+      'PLN': 'pln',
+      'MOBILE LEGENDS': 'mobile_legends',
+      'FREE FIRE': 'free_fire',
+      'PUBG MOBILE': 'pubg',
+      'GOPAY': 'gopay',
+      'OVO': 'ovo',
+      'DANA': 'dana',
+      'SHOPEEPAY': 'shopeepay'
+    };
+    return brandMap[dfBrand.toUpperCase()] || dfBrand.toLowerCase();
+  }
+
+  function calculateAdminFee(price: number): number {
+    if (price <= 10000) return 750;
+    if (price <= 25000) return 1000;
+    if (price <= 50000) return 1500;
+    if (price <= 100000) return 2000;
+    return 2500;
+  }
+
   // Get products by category
   app.get("/api/products/:category", async (req, res) => {
     try {

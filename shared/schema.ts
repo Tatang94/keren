@@ -45,9 +45,7 @@ export const insertTransactionSchema = createInsertSchema(transactions).omit({
   updatedAt: true,
 });
 
-export const insertProductSchema = createInsertSchema(products).omit({
-  id: true,
-});
+export const insertProductSchema = createInsertSchema(products);
 
 export const insertAdminStatsSchema = createInsertSchema(adminStats).omit({
   id: true,

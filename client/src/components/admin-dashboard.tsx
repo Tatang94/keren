@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { 
   Table, 
   TableBody, 
@@ -14,12 +15,18 @@ import {
   Clock, 
   AlertTriangle,
   CheckCircle,
-  XCircle
+  XCircle,
+  RefreshCw
 } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import type { Transaction } from "@shared/schema";
 
 export default function AdminDashboard() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
   const { data: stats } = useQuery<{
     todayTransactions: number;
     todayRevenue: number;
@@ -33,6 +40,27 @@ export default function AdminDashboard() {
   const { data: transactions } = useQuery<Transaction[]>({
     queryKey: ['/api/admin/transactions'],
     refetchInterval: 10000, // Refresh every 10 seconds
+  });
+
+  const syncProductsMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest('POST', '/api/admin/sync-products');
+      return response.json();
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Sukses",
+        description: `Berhasil sinkronisasi ${data.count} produk dari Digiflazz`,
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/products'] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Gagal sinkronisasi produk dari Digiflazz",
+        variant: "destructive"
+      });
+    }
   });
 
   const formatCurrency = (amount: number) => {
@@ -81,6 +109,25 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-8">
+      {/* Admin Actions */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Admin Actions</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex gap-4">
+            <Button
+              onClick={() => syncProductsMutation.mutate()}
+              disabled={syncProductsMutation.isPending}
+              className="bg-primary hover:bg-blue-700"
+            >
+              <RefreshCw className={`mr-2 h-4 w-4 ${syncProductsMutation.isPending ? 'animate-spin' : ''}`} />
+              {syncProductsMutation.isPending ? 'Syncing...' : 'Sync Produk Digiflazz'}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card>

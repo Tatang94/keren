@@ -55,8 +55,8 @@ export class PaydisiniService {
     this.apiKey = process.env.PAYDISINI_API_KEY || "";
   }
 
-  private generateSign(data: string): string {
-    const crypto = require('crypto');
+  private async generateSign(data: string): Promise<string> {
+    const crypto = await import('crypto');
     return crypto.createHash('md5').update(data).digest('hex');
   }
 
@@ -69,7 +69,7 @@ export class PaydisiniService {
   ): Promise<PaydisiniCreatePaymentResponse> {
     try {
       const data = this.apiKey + uniqueCode + service + amount + validTime + "NewTransaction";
-      const signature = this.generateSign(data);
+      const signature = await this.generateSign(data);
 
       const payload: PaydisiniCreatePaymentRequest = {
         key: this.apiKey,
@@ -110,7 +110,7 @@ export class PaydisiniService {
   async checkPaymentStatus(uniqueCode: string): Promise<PaydisiniCheckStatusResponse> {
     try {
       const data = this.apiKey + uniqueCode + "StatusTransaction";
-      const signature = this.generateSign(data);
+      const signature = await this.generateSign(data);
 
       const formData = new URLSearchParams();
       formData.append('key', this.apiKey);

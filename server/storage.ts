@@ -31,6 +31,7 @@ export class MemStorage implements IStorage {
     this.products = new Map();
     this.adminStats = new Map();
     this.initializeProducts();
+    this.syncDigiflazzProducts();
   }
 
   private initializeProducts() {
@@ -70,6 +71,81 @@ export class MemStorage implements IStorage {
     defaultProducts.forEach(product => {
       this.products.set(product.id, product);
     });
+  }
+
+  private async syncDigiflazzProducts() {
+    try {
+      const { digiflazzService } = await import("./services/digiflazz");
+      const digiflazzProducts = await digiflazzService.getProducts();
+      
+      // Convert Digiflazz products to our format
+      digiflazzProducts.forEach(dfProduct => {
+        if (dfProduct.status === 'available') {
+          const category = this.mapDigiflazzCategory(dfProduct.category);
+          const provider = this.mapDigiflazzBrand(dfProduct.brand);
+          
+          const product: Product = {
+            id: dfProduct.buyer_sku_code,
+            category: category,
+            provider: provider.toLowerCase(),
+            name: dfProduct.product_name,
+            price: dfProduct.price,
+            adminFee: this.calculateAdminFee(dfProduct.price),
+            isActive: true
+          };
+          
+          this.products.set(product.id, product);
+        }
+      });
+      
+      console.log(`Synced ${digiflazzProducts.length} products from Digiflazz`);
+    } catch (error) {
+      console.error('Failed to sync Digiflazz products:', error);
+    }
+  }
+
+  private mapDigiflazzCategory(dfCategory: string): string {
+    const categoryMap: Record<string, string> = {
+      'Pulsa': 'pulsa',
+      'Paket Data': 'pulsa',
+      'PLN': 'token_listrik',
+      'Token Listrik': 'token_listrik',
+      'Games': 'game_voucher',
+      'Voucher Game': 'game_voucher',
+      'E-Money': 'ewallet',
+      'E-Wallet': 'ewallet',
+      'PDAM': 'tagihan',
+      'Multifinance': 'tagihan'
+    };
+    return categoryMap[dfCategory] || 'pulsa';
+  }
+
+  private mapDigiflazzBrand(dfBrand: string): string {
+    const brandMap: Record<string, string> = {
+      'TELKOMSEL': 'telkomsel',
+      'INDOSAT': 'indosat',
+      'XL AXIATA': 'xl',
+      'TRI': 'tri',
+      'SMARTFREN': 'smartfren',
+      'AXIS': 'axis',
+      'PLN': 'pln',
+      'MOBILE LEGENDS': 'mobile_legends',
+      'FREE FIRE': 'free_fire',
+      'PUBG MOBILE': 'pubg',
+      'GOPAY': 'gopay',
+      'OVO': 'ovo',
+      'DANA': 'dana',
+      'SHOPEEPAY': 'shopeepay'
+    };
+    return brandMap[dfBrand.toUpperCase()] || dfBrand.toLowerCase();
+  }
+
+  private calculateAdminFee(price: number): number {
+    if (price <= 10000) return 750;
+    if (price <= 25000) return 1000;
+    if (price <= 50000) return 1500;
+    if (price <= 100000) return 2000;
+    return 2500;
   }
 
   async getTransaction(id: string): Promise<Transaction | undefined> {

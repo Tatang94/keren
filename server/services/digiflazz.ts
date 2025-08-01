@@ -42,15 +42,15 @@ export class DigiflazzService {
     this.apiKey = process.env.DIGIFLAZZ_API_KEY || "";
   }
 
-  private generateSign(refId: string, customerNo: string, buyerSkuCode: string): string {
-    const crypto = require('crypto');
+  private async generateSign(refId: string, customerNo: string, buyerSkuCode: string): Promise<string> {
+    const crypto = await import('crypto');
     const data = this.username + this.apiKey + refId;
     return crypto.createHash('md5').update(data).digest('hex');
   }
 
   async getProducts(): Promise<DigiflazzProduct[]> {
     try {
-      const sign = this.generateSign("", "", "");
+      const sign = await this.generateSign("pricelist", "", "");
       const payload = {
         cmd: "prepaid",
         username: this.username,
@@ -116,7 +116,7 @@ export class DigiflazzService {
     refId: string
   ): Promise<DigiflazzTransactionResponse> {
     try {
-      const sign = this.generateSign(refId, customerNo, buyerSkuCode);
+      const sign = await this.generateSign(refId, customerNo, buyerSkuCode);
       
       const payload: DigiflazzTransactionRequest = {
         commands: "inq-pasca",
@@ -148,7 +148,7 @@ export class DigiflazzService {
 
   async checkTransactionStatus(refId: string): Promise<DigiflazzTransactionResponse> {
     try {
-      const sign = this.generateSign(refId, "", "");
+      const sign = await this.generateSign(refId, "", "");
       
       const payload = {
         commands: "status-pasca",
