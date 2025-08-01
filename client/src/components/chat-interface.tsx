@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Bot, User, Send, Mic, X } from "lucide-react";
+import { Bot, User, Send, Mic } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -147,22 +147,17 @@ export default function ChatInterface({ isOpen, onClose, onProductSelect }: Chat
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col p-0">
         <DialogHeader className="p-6 border-b border-gray-200">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center">
-                <Bot className="text-white h-6 w-6" />
-              </div>
-              <div className="ml-4">
-                <DialogTitle className="text-lg font-semibold">AI Assistant PPOB</DialogTitle>
-                <span className="text-sm text-green-500 flex items-center">
-                  <div className="w-2 h-2 bg-green-500 rounded-full mr-1"></div>
-                  Siap membantu Anda
-                </span>
-              </div>
+          <div className="flex items-center">
+            <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center">
+              <Bot className="text-white h-6 w-6" />
             </div>
-            <Button variant="ghost" size="icon" onClick={onClose}>
-              <X className="h-5 w-5" />
-            </Button>
+            <div className="ml-4">
+              <DialogTitle className="text-lg font-semibold">AI Assistant PPOB</DialogTitle>
+              <span className="text-sm text-green-500 flex items-center">
+                <div className="w-2 h-2 bg-green-500 rounded-full mr-1"></div>
+                Siap membantu Anda
+              </span>
+            </div>
           </div>
         </DialogHeader>
         
