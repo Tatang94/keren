@@ -100,12 +100,12 @@ export default function Home() {
                   size="lg"
                 >
                   <ShoppingCart className="mr-2 h-5 w-5" />
-                  <span>Lihat Produk</span>
+                  Lihat Produk
                 </Button>
               </div>
             </div>
-            <div className="relative">
-              {/* AI Chat Interface Preview */}
+            <div className="relative pointer-events-none">
+              {/* AI Chat Interface Preview - Non-clickable */}
               <Card className="bg-white text-gray-800 shadow-2xl">
                 <CardContent className="p-6">
                   <div className="flex items-center mb-4">
@@ -143,19 +143,21 @@ export default function Home() {
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-2 border-t pt-4">
                     <input 
                       type="text" 
-                      placeholder="Ketik perintah Anda..." 
-                      className="flex-1 border border-gray-300 rounded-lg px-4 py-2 text-sm"
+                      placeholder="Ketik perintah pembelian..."
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm bg-gray-50"
                       disabled
+                      readOnly
                     />
-                    <Button size="sm" className="bg-primary hover:bg-blue-700">
-                      <MessageCircle className="h-4 w-4" />
+                    <Button size="sm" disabled className="bg-primary opacity-70">
+                      <Bot className="h-4 w-4" />
                     </Button>
                   </div>
                 </CardContent>
               </Card>
+              <div className="absolute inset-0 bg-transparent"></div>
             </div>
           </div>
         </div>
@@ -163,7 +165,7 @@ export default function Home() {
 
       {/* Product Categories */}
       <section id="produk">
-        <ProductCategories onCategorySelect={() => setShowChat(true)} />
+        <ProductCategories onCategorySelect={() => {}} />
       </section>
 
       {/* Transaction Status */}
