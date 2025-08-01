@@ -121,16 +121,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Parse the command using Gemini AI
       const parsedOrder = await parseOrderCommand(command);
       
+      // Check if this is a non-PPOB question
+      if (parsedOrder.confidence === 0) {
+        return res.json({
+          success: false,
+          message: "Maaf, saya hanya dapat membantu dengan pembelian produk digital PPOB seperti pulsa, token listrik, game voucher, dan top up e-wallet.\n\nContoh perintah:\n• Beli pulsa Telkomsel 50rb untuk 081234567890\n• Token listrik 100rb meter 12345678901\n• Top up GoPay 200rb ke 081234567890"
+        });
+      }
+      
       if (parsedOrder.confidence < 0.7) {
-        const errorMsg = await generateErrorMessage("Perintah tidak cukup jelas");
-        return res.json({ 
-          success: false, 
-          message: errorMsg,
-          suggestions: [
-            "Coba: 'Beli pulsa Telkomsel 50rb untuk 081234567890'",
-            "Atau: 'Token listrik 100 ribu untuk 12345678901'",
-            "Atau: 'Top up GoPay 200rb ke 089876543210'"
-          ]
+        return res.json({
+          success: false,
+          message: "Perintah kurang jelas. Silakan gunakan format yang lebih spesifik:\n\nContoh:\n• Beli pulsa [provider] [nominal] untuk [nomor]\n• Token listrik [nominal] meter [nomor meter]\n• Top up [e-wallet] [nominal] ke [nomor]"
         });
       }
 

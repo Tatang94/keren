@@ -27,7 +27,7 @@ export default function ChatInterface({ isOpen, onClose, onProductSelect }: Chat
     {
       id: '1',
       type: 'ai',
-      message: 'Selamat datang! Saya AI Assistant yang akan membantu Anda melakukan pembelian produk digital. Beberapa contoh perintah:\n\n• "Beli pulsa Telkomsel 50rb untuk 081234567890"\n• "Token listrik 100rb untuk 12345678901"\n• "Top up GoPay 200rb untuk 081234567890"',
+      message: 'Halo! Saya PPOB Assistant yang siap membantu pembelian produk digital Anda.\n\nContoh perintah:\n• "Beli pulsa Telkomsel 50rb untuk 081234567890"\n• "Token listrik 100rb meter 12345678901"\n• "Top up GoPay 200rb ke 081234567890"\n\nKetik perintah Anda...',
       timestamp: new Date()
     }
   ]);
@@ -58,20 +58,6 @@ export default function ChatInterface({ isOpen, onClose, onProductSelect }: Chat
         productData: data.productData
       };
       setMessages(prev => [...prev, aiMessage]);
-
-      if (data.success && data.productData) {
-        // Add confirmation buttons
-        setTimeout(() => {
-          const confirmMessage: ChatMessage = {
-            id: Date.now().toString() + '_confirm',
-            type: 'ai',
-            message: 'Apakah Anda ingin melanjutkan ke pembayaran?',
-            timestamp: new Date(),
-            productData: data.productData
-          };
-          setMessages(prev => [...prev, confirmMessage]);
-        }, 1000);
-      }
     },
     onError: (error) => {
       const errorMessage: ChatMessage = {
@@ -198,30 +184,14 @@ export default function ChatInterface({ isOpen, onClose, onProductSelect }: Chat
                     )}
                     <div className="flex-1">
                       <p className="text-sm">{message.message}</p>
-                      {message.productData && message.id.includes('_confirm') && (
+                      {message.productData && (
                         <div className="mt-3 space-y-2">
                           <Button 
                             size="sm" 
-                            className="w-full"
+                            className="w-full bg-primary hover:bg-blue-700"
                             onClick={() => handleConfirmPayment(message.productData)}
                           >
-                            Ya, Lanjutkan Pembayaran
-                          </Button>
-                          <Button 
-                            size="sm" 
-                            variant="outline" 
-                            className="w-full"
-                            onClick={() => {
-                              const cancelMessage: ChatMessage = {
-                                id: Date.now().toString(),
-                                type: 'ai',
-                                message: 'Baik, transaksi dibatalkan. Ada yang bisa saya bantu lagi?',
-                                timestamp: new Date()
-                              };
-                              setMessages(prev => [...prev, cancelMessage]);
-                            }}
-                          >
-                            Batal
+                            Lanjutkan Pembayaran
                           </Button>
                         </div>
                       )}

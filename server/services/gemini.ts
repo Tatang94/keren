@@ -12,18 +12,26 @@ export interface ParsedOrder {
 
 export async function parseOrderCommand(command: string): Promise<ParsedOrder> {
   try {
-    const systemPrompt = `Anda adalah AI assistant untuk platform PPOB (Payment Point Online Bank) Indonesia.
-Analisis perintah pembelian dalam bahasa Indonesia dan ekstrak informasi berikut:
-- productType: "pulsa", "token_listrik", "game_voucher", atau "ewallet"
-- provider: nama provider (telkomsel, indosat, xl, tri, smartfren, pln, mobile_legends, free_fire, pubg, gopay, ovo, dana, shopeepay)
-- amount: nominal dalam rupiah (tanpa "rb" atau "ribu", konversi ke angka penuh)
-- targetNumber: nomor HP, ID pelanggan, atau nomor meter
-- confidence: skor kepercayaan 0-1
+    const systemPrompt = `Anda adalah AI assistant khusus untuk platform PPOB (Payment Point Online Bank) Indonesia.
 
-Contoh input dan output:
+PENTING: Hanya proses perintah yang berkaitan dengan pembelian produk digital seperti:
+- Pulsa (Telkomsel, Indosat, XL, Tri, Smartfren, Axis)
+- Token listrik PLN 
+- Game voucher (Mobile Legends, Free Fire, PUBG)
+- E-wallet top up (GoPay, OVO, DANA, ShopeePay)
+
+Jika pertanyaan BUKAN tentang pembelian produk digital PPOB, return dengan confidence: 0.
+
+Analisis perintah pembelian dan ekstrak:
+- productType: "pulsa", "token_listrik", "game_voucher", atau "ewallet"
+- provider: nama provider
+- amount: nominal dalam rupiah (konversi "rb"/"ribu" ke angka penuh)
+- targetNumber: nomor HP/ID pelanggan/nomor meter
+- confidence: 0-1 (0 jika bukan perintah PPOB)
+
+Contoh:
 "Beli pulsa Telkomsel 50rb untuk 081234567890" -> {"productType": "pulsa", "provider": "telkomsel", "amount": 50000, "targetNumber": "081234567890", "confidence": 0.95}
-"Token listrik 100 ribu meter 12345678901" -> {"productType": "token_listrik", "provider": "pln", "amount": 100000, "targetNumber": "12345678901", "confidence": 0.9}
-"Top up GoPay 200rb ke 089876543210" -> {"productType": "ewallet", "provider": "gopay", "amount": 200000, "targetNumber": "089876543210", "confidence": 0.9}
+"Bagaimana cara masak nasi?" -> {"productType": "", "provider": "", "amount": 0, "targetNumber": "", "confidence": 0}
 
 Respond hanya dengan JSON yang valid.`;
 
@@ -66,12 +74,20 @@ export async function generateOrderConfirmation(
   adminFee: number
 ): Promise<string> {
   try {
-    const prompt = `Buatkan konfirmasi pembelian dalam bahasa Indonesia yang natural dan friendly untuk:
+    const prompt = `Buatkan konfirmasi pembelian yang singkat, jelas, dan profesional dalam bahasa Indonesia untuk:
+
 Produk: ${productName}
 Nomor tujuan: ${targetNumber}
 Harga: Rp ${amount.toLocaleString('id-ID')}
 Biaya admin: Rp ${adminFee.toLocaleString('id-ID')}
 Total: Rp ${(amount + adminFee).toLocaleString('id-ID')}
+
+Format yang diinginkan:
+- Konfirmasi singkat dan jelas
+- Tampilkan detail produk, nomor, dan total pembayaran
+- Akhiri dengan konfirmasi untuk melanjutkan pembayaran
+- JANGAN buat multiple pilihan/variasi
+- Gunakan bahasa yang ramah namun profesional
 
 Buatlah konfirmasi yang ramah dan jelas, minta konfirmasi untuk melanjutkan pembayaran.`;
 
