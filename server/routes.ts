@@ -211,8 +211,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Webhook endpoint for payment status updates
-  app.post("/api/webhook/payment", async (req, res) => {
+  // Webhook endpoint for Paydisini payment callbacks
+  app.post("/api/webhook/paydisini", async (req, res) => {
     try {
       const { unique_code, status } = req.body;
       

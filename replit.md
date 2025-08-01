@@ -42,10 +42,12 @@ Preferred communication style: Simple, everyday language.
 ## External Service Integrations
 - **Digital Product Provider**: Digiflazz API for product fulfillment
 - **Payment Gateway**: Paydisini for payment processing and checkout URLs
+- **Webhook Endpoint**: `/api/webhook/paydisini` for payment status callbacks
 - **Services Handle**:
   - Product catalog synchronization
   - Transaction processing and status updates
   - Payment link generation and validation
+  - Real-time payment status updates via webhooks
 
 ## Development Tools
 - **Build System**: Vite with React plugin and TypeScript support

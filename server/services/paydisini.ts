@@ -57,7 +57,7 @@ export class PaydisiniService {
 
   private generateSign(data: string): string {
     const crypto = require('crypto');
-    return crypto.createHash('md5').update(this.apiKey + data).digest('hex');
+    return crypto.createHash('md5').update(data).digest('hex');
   }
 
   async createPayment(
