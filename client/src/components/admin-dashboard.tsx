@@ -20,7 +20,12 @@ import { useQuery } from "@tanstack/react-query";
 import type { Transaction } from "@shared/schema";
 
 export default function AdminDashboard() {
-  const { data: stats } = useQuery({
+  const { data: stats } = useQuery<{
+    todayTransactions: number;
+    todayRevenue: number;
+    pendingTransactions: number;
+    failedTransactions: number;
+  }>({
     queryKey: ['/api/admin/stats'],
     refetchInterval: 30000, // Refresh every 30 seconds
   });

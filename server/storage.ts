@@ -88,6 +88,11 @@ export class MemStorage implements IStorage {
     const transaction: Transaction = {
       ...insertTransaction,
       id,
+      status: insertTransaction.status || 'pending',
+      paymentUrl: insertTransaction.paymentUrl || null,
+      digiflazzRef: insertTransaction.digiflazzRef || null,
+      paydisiniRef: insertTransaction.paydisiniRef || null,
+      aiCommand: insertTransaction.aiCommand || null,
       createdAt: now,
       updatedAt: now,
     };
@@ -137,7 +142,11 @@ export class MemStorage implements IStorage {
 
   async createProduct(insertProduct: InsertProduct): Promise<Product> {
     const id = randomUUID();
-    const product: Product = { ...insertProduct, id };
+    const product: Product = { 
+      ...insertProduct, 
+      id,
+      isActive: insertProduct.isActive ?? true
+    };
     this.products.set(id, product);
     return product;
   }

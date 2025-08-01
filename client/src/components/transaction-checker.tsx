@@ -13,7 +13,7 @@ export default function TransactionChecker() {
   const [shouldSearch, setShouldSearch] = useState(false);
   const { toast } = useToast();
 
-  const { data: transactions, isLoading, error } = useQuery({
+  const { data: transactions, isLoading, error } = useQuery<Transaction[]>({
     queryKey: ['/api/transactions/check', searchQuery],
     enabled: shouldSearch && searchQuery.length > 0,
   });
