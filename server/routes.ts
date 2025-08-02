@@ -524,12 +524,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Generate confirmation dengan AI
-      const confirmationMsg = await generateOrderConfirmation(
-        selectedProduct.name,
-        parsedOrder.targetNumber,
-        selectedProduct.price,
-        selectedProduct.adminFee
-      );
+      // Simple confirmation message
+      const confirmationMsg = `Konfirmasi pembelian:
+
+${selectedProduct.name} ke ${parsedOrder.targetNumber}
+Total: Rp ${(selectedProduct.price + selectedProduct.adminFee).toLocaleString('id-ID')} (termasuk admin)
+
+Lanjutkan pembayaran?`;
 
       return res.json({
         success: true,

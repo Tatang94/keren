@@ -95,75 +95,52 @@ export default function PaymentModal({ isOpen, onClose, paymentData }: PaymentMo
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <div className="flex items-center justify-between">
-            <DialogTitle>Konfirmasi Pembayaran</DialogTitle>
-            <Button variant="ghost" size="icon" onClick={onClose}>
-              <X className="h-5 w-5" />
-            </Button>
-          </div>
+          <DialogTitle>Konfirmasi Bayar</DialogTitle>
         </DialogHeader>
         
-        <div className="space-y-6">
-          {/* Product Info */}
+        <div className="space-y-4">
+          {/* Product Info - Simplified */}
           <div className="text-center">
-            <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
-              {getProductIcon(paymentData.productName)}
-            </div>
-            <h4 className="text-xl font-semibold text-gray-900 mb-2">
+            <h4 className="text-lg font-semibold mb-1">
               {paymentData.productName}
             </h4>
-            <p className="text-gray-600">{paymentData.targetNumber}</p>
+            <p className="text-gray-600 mb-4">{paymentData.targetNumber}</p>
           </div>
           
-          {/* Price Breakdown */}
-          <Card className="bg-gray-50">
-            <CardContent className="p-4">
-              <div className="space-y-3">
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Harga Produk</span>
-                  <span className="font-medium">{formatCurrency(paymentData.amount)}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Biaya Admin</span>
-                  <span className="font-medium">{formatCurrency(paymentData.adminFee)}</span>
-                </div>
-                <Separator />
-                <div className="flex justify-between items-center">
-                  <span className="font-semibold text-gray-900">Total Pembayaran</span>
-                  <span className="font-bold text-lg text-primary">
-                    {formatCurrency(paymentData.totalAmount)}
-                  </span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          {/* Simple Total */}
+          <div className="bg-blue-50 p-4 rounded-lg text-center">
+            <p className="text-sm text-gray-600 mb-1">Total Pembayaran</p>
+            <p className="text-2xl font-bold text-blue-600">
+              {formatCurrency(paymentData.totalAmount)}
+            </p>
+            <p className="text-xs text-gray-500 mt-1">
+              (Termasuk biaya admin)
+            </p>
+          </div>
           
-          {/* Payment Buttons */}
-          <div className="space-y-3">
-            <Button 
-              onClick={handlePayment}
-              className="w-full bg-primary hover:bg-blue-700"
-              disabled={createTransactionMutation.isPending}
-            >
-              <CreditCard className="mr-2 h-4 w-4" />
-              {createTransactionMutation.isPending ? 'Memproses...' : 'Bayar dengan Paydisini'}
-              <ExternalLink className="ml-2 h-4 w-4" />
-            </Button>
+          {/* Simple Buttons */}
+          <div className="flex gap-3">
             <Button 
               onClick={onClose}
               variant="outline" 
-              className="w-full"
+              className="flex-1"
               disabled={createTransactionMutation.isPending}
             >
               Batal
             </Button>
+            <Button 
+              onClick={handlePayment}
+              className="flex-1 bg-blue-600 hover:bg-blue-700"
+              disabled={createTransactionMutation.isPending}
+            >
+              {createTransactionMutation.isPending ? 'Proses...' : 'Bayar'}
+            </Button>
           </div>
 
-          {/* Payment Info */}
-          <div className="text-center text-sm text-gray-500">
-            <p>Anda akan diarahkan ke halaman pembayaran Paydisini</p>
-            <p>Metode pembayaran: QRIS, Virtual Account, E-Wallet</p>
-          </div>
+          {/* Simple Info */}
+          <p className="text-center text-sm text-gray-500">
+            Pembayaran via QRIS, Transfer Bank, E-Wallet
+          </p>
         </div>
       </DialogContent>
     </Dialog>

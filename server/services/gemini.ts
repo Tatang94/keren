@@ -108,13 +108,13 @@ Harga: Rp ${amount.toLocaleString('id-ID')}
 Biaya admin: Rp ${adminFee.toLocaleString('id-ID')}
 Total: Rp ${(amount + adminFee).toLocaleString('id-ID')}
 
-PENTING: 
-- Gunakan kata perintah yang konsisten dengan contoh: "Beli pulsa", "Token listrik PLN", "Top up", "Voucher"
-- Respons maksimal 3-4 baris saja
-- Format: konfirmasi singkat + detail + total + instruksi lanjut
-- Jangan gunakan emoji atau variasi berlebihan
+Format yang diinginkan:
+"Konfirmasi pembelian Anda:
+Anda akan [action] [produk] ke [nomor].
+Detail: Rp [harga] + admin Rp [admin].
+Total: Rp [total]. Lanjutkan pembayaran?"
 
-Buatlah konfirmasi yang ramah dan jelas, minta konfirmasi untuk melanjutkan pembayaran.`;
+Buatlah respons singkat dan mudah dipahami.`;
 
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash",

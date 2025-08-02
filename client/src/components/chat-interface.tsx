@@ -27,7 +27,7 @@ export default function ChatInterface({ isOpen, onClose, onProductSelect }: Chat
     {
       id: '1',
       type: 'ai',
-      message: 'Halo! Saya PPOB Assistant yang terintegrasi dengan Digiflazz. Saya siap membantu:\n\n🔍 **Cek Harga Produk:**\n• "Cek harga pulsa Telkomsel"\n• "Harga token PLN 50rb"\n• "List voucher Mobile Legends"\n\n💰 **Transaksi:**\n• "Beli pulsa Telkomsel 50rb untuk 081234567890"\n• "Token listrik PLN 100rb meter 12345678901"\n• "Voucher ML 172 diamond untuk 081234567890"\n\n📊 **Info Lainnya:**\n• "Status transaksi [ID]"\n• "Produk tersedia kategori pulsa"\n\nSilakan ketik perintah Anda...',
+      message: 'Halo! Saya siap membantu pembelian pulsa, token listrik, dan voucher game.\n\nContoh perintah:\n• Beli pulsa Telkomsel 50rb untuk 081234567890\n• Token PLN 100rb meter 12345678901\n• Cek harga pulsa Indosat\n\nKetik perintah Anda:',
       timestamp: new Date()
     }
   ]);
