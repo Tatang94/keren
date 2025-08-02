@@ -38,8 +38,8 @@ export class DigiflazzService {
   private baseUrl: string = "https://api.digiflazz.com/v1";
 
   constructor() {
-    this.username = process.env.DIGIFLAZZ_USERNAME || "";
-    this.apiKey = process.env.DIGIFLAZZ_API_KEY || "";
+    this.username = process.env.DIGIFLAZZ_USERNAME || "miwewogwOZ2g";
+    this.apiKey = process.env.DIGIFLAZZ_API_KEY || "8c2f1f52-6e36-56de-a1cd-3662bd5eb375";
   }
 
   private async generateSign(refId: string, customerNo?: string, buyerSkuCode?: string): Promise<string> {

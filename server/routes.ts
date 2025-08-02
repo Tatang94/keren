@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { parseOrderCommand, generateOrderConfirmation, generateErrorMessage, analyzeDigiflazzProducts, generateTransactionAdvice, generateCompletionNotification } from "./services/gemini";
 import { digiflazzService } from "./services/digiflazz";
-import { paydisiniService } from "./services/paydisini";
+// import { paydisiniService } from "./services/paydisini"; // Removed as requested
 import { insertTransactionSchema } from "@shared/schema";
 import { z } from "zod";
 

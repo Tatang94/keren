@@ -1,6 +1,6 @@
 import { GoogleGenAI } from "@google/genai";
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "AIzaSyCGNnI10A6xLryJ8LjxJkM_FkA6NLNULlU" });
 
 export interface ParsedOrder {
   intent: string; // "buy", "check_price", "list_products", "check_status"
