@@ -196,39 +196,163 @@ export default function ChatInterface({ isOpen, onClose, onProductSelect }: Chat
                                   <SelectValue placeholder="Pilih produk yang ingin dibeli..." />
                                 </SelectTrigger>
                                 <SelectContent>
+                                  {/* === PRABAYAR === */}
+                                  {/* Pulsa */}
+                                  <SelectItem value="Beli pulsa Telkomsel 5rb">📱 Pulsa Telkomsel 5.000</SelectItem>
                                   <SelectItem value="Beli pulsa Telkomsel 10rb">📱 Pulsa Telkomsel 10.000</SelectItem>
                                   <SelectItem value="Beli pulsa Telkomsel 25rb">📱 Pulsa Telkomsel 25.000</SelectItem>
                                   <SelectItem value="Beli pulsa Telkomsel 50rb">📱 Pulsa Telkomsel 50.000</SelectItem>
                                   <SelectItem value="Beli pulsa Telkomsel 100rb">📱 Pulsa Telkomsel 100.000</SelectItem>
                                   
+                                  <SelectItem value="Beli pulsa Indosat 5rb">📱 Pulsa Indosat 5.000</SelectItem>
                                   <SelectItem value="Beli pulsa Indosat 10rb">📱 Pulsa Indosat 10.000</SelectItem>
                                   <SelectItem value="Beli pulsa Indosat 25rb">📱 Pulsa Indosat 25.000</SelectItem>
                                   <SelectItem value="Beli pulsa Indosat 50rb">📱 Pulsa Indosat 50.000</SelectItem>
+                                  <SelectItem value="Beli pulsa Indosat 100rb">📱 Pulsa Indosat 100.000</SelectItem>
                                   
+                                  <SelectItem value="Beli pulsa XL 5rb">📱 Pulsa XL 5.000</SelectItem>
                                   <SelectItem value="Beli pulsa XL 10rb">📱 Pulsa XL 10.000</SelectItem>
                                   <SelectItem value="Beli pulsa XL 25rb">📱 Pulsa XL 25.000</SelectItem>
                                   <SelectItem value="Beli pulsa XL 50rb">📱 Pulsa XL 50.000</SelectItem>
+                                  <SelectItem value="Beli pulsa XL 100rb">📱 Pulsa XL 100.000</SelectItem>
                                   
                                   <SelectItem value="Beli pulsa Tri 5rb">📱 Pulsa Tri 5.000</SelectItem>
                                   <SelectItem value="Beli pulsa Tri 10rb">📱 Pulsa Tri 10.000</SelectItem>
                                   <SelectItem value="Beli pulsa Tri 25rb">📱 Pulsa Tri 25.000</SelectItem>
+                                  <SelectItem value="Beli pulsa Tri 50rb">📱 Pulsa Tri 50.000</SelectItem>
                                   
+                                  <SelectItem value="Beli pulsa Smartfren 5rb">📱 Pulsa Smartfren 5.000</SelectItem>
+                                  <SelectItem value="Beli pulsa Smartfren 10rb">📱 Pulsa Smartfren 10.000</SelectItem>
+                                  <SelectItem value="Beli pulsa Smartfren 25rb">📱 Pulsa Smartfren 25.000</SelectItem>
+                                  <SelectItem value="Beli pulsa Smartfren 50rb">📱 Pulsa Smartfren 50.000</SelectItem>
+                                  
+                                  <SelectItem value="Beli pulsa Axis 5rb">📱 Pulsa Axis 5.000</SelectItem>
+                                  <SelectItem value="Beli pulsa Axis 10rb">📱 Pulsa Axis 10.000</SelectItem>
+                                  <SelectItem value="Beli pulsa Axis 25rb">📱 Pulsa Axis 25.000</SelectItem>
+                                  <SelectItem value="Beli pulsa Axis 50rb">📱 Pulsa Axis 50.000</SelectItem>
+                                  
+                                  {/* Data/Internet */}
                                   <SelectItem value="Beli data Telkomsel 1GB">📶 Data Telkomsel 1GB</SelectItem>
                                   <SelectItem value="Beli data Telkomsel 3GB">📶 Data Telkomsel 3GB</SelectItem>
                                   <SelectItem value="Beli data Telkomsel 8GB">📶 Data Telkomsel 8GB</SelectItem>
+                                  <SelectItem value="Beli data Telkomsel 15GB">📶 Data Telkomsel 15GB</SelectItem>
                                   
+                                  <SelectItem value="Beli data Indosat 1GB">📶 Data Indosat 1GB</SelectItem>
+                                  <SelectItem value="Beli data Indosat 3GB">📶 Data Indosat 3GB</SelectItem>
+                                  <SelectItem value="Beli data Indosat 8GB">📶 Data Indosat 8GB</SelectItem>
+                                  
+                                  <SelectItem value="Beli data XL 1GB">📶 Data XL 1GB</SelectItem>
+                                  <SelectItem value="Beli data XL 3GB">📶 Data XL 3GB</SelectItem>
+                                  <SelectItem value="Beli data XL 8GB">📶 Data XL 8GB</SelectItem>
+                                  
+                                  <SelectItem value="Beli data Tri 1GB">📶 Data Tri 1GB</SelectItem>
+                                  <SelectItem value="Beli data Tri 3GB">📶 Data Tri 3GB</SelectItem>
+                                  <SelectItem value="Beli data Tri 8GB">📶 Data Tri 8GB</SelectItem>
+                                  
+                                  {/* Games & Voucher */}
+                                  <SelectItem value="Beli diamond Mobile Legends 86">🎮 Mobile Legends 86 Diamond</SelectItem>
+                                  <SelectItem value="Beli diamond Mobile Legends 172">🎮 Mobile Legends 172 Diamond</SelectItem>
+                                  <SelectItem value="Beli diamond Mobile Legends 344">🎮 Mobile Legends 344 Diamond</SelectItem>
+                                  <SelectItem value="Beli diamond Mobile Legends 720">🎮 Mobile Legends 720 Diamond</SelectItem>
+                                  
+                                  <SelectItem value="Beli diamond Free Fire 70">🎮 Free Fire 70 Diamond</SelectItem>
+                                  <SelectItem value="Beli diamond Free Fire 140">🎮 Free Fire 140 Diamond</SelectItem>
+                                  <SelectItem value="Beli diamond Free Fire 355">🎮 Free Fire 355 Diamond</SelectItem>
+                                  <SelectItem value="Beli diamond Free Fire 720">🎮 Free Fire 720 Diamond</SelectItem>
+                                  
+                                  <SelectItem value="Beli UC PUBG 60">🎮 PUBG Mobile 60 UC</SelectItem>
+                                  <SelectItem value="Beli UC PUBG 300">🎮 PUBG Mobile 300 UC</SelectItem>
+                                  <SelectItem value="Beli UC PUBG 600">🎮 PUBG Mobile 600 UC</SelectItem>
+                                  
+                                  <SelectItem value="Beli Robux Roblox 80">🎮 Roblox 80 Robux</SelectItem>
+                                  <SelectItem value="Beli Robux Roblox 400">🎮 Roblox 400 Robux</SelectItem>
+                                  <SelectItem value="Beli Robux Roblox 800">🎮 Roblox 800 Robux</SelectItem>
+                                  
+                                  <SelectItem value="Beli voucher Steam 60rb">🎮 Steam Wallet 60.000</SelectItem>
+                                  <SelectItem value="Beli voucher Steam 120rb">🎮 Steam Wallet 120.000</SelectItem>
+                                  <SelectItem value="Beli voucher Steam 250rb">🎮 Steam Wallet 250.000</SelectItem>
+                                  
+                                  <SelectItem value="Beli voucher Google Play 25rb">🎮 Google Play 25.000</SelectItem>
+                                  <SelectItem value="Beli voucher Google Play 50rb">🎮 Google Play 50.000</SelectItem>
+                                  <SelectItem value="Beli voucher Google Play 100rb">🎮 Google Play 100.000</SelectItem>
+                                  
+                                  {/* E-Money */}
+                                  <SelectItem value="Beli GoPay 25rb">💳 GoPay 25.000</SelectItem>
+                                  <SelectItem value="Beli GoPay 50rb">💳 GoPay 50.000</SelectItem>
+                                  <SelectItem value="Beli GoPay 100rb">💳 GoPay 100.000</SelectItem>
+                                  <SelectItem value="Beli GoPay 200rb">💳 GoPay 200.000</SelectItem>
+                                  
+                                  <SelectItem value="Beli OVO 25rb">💳 OVO 25.000</SelectItem>
+                                  <SelectItem value="Beli OVO 50rb">💳 OVO 50.000</SelectItem>
+                                  <SelectItem value="Beli OVO 100rb">💳 OVO 100.000</SelectItem>
+                                  <SelectItem value="Beli OVO 200rb">💳 OVO 200.000</SelectItem>
+                                  
+                                  <SelectItem value="Beli DANA 25rb">💳 DANA 25.000</SelectItem>
+                                  <SelectItem value="Beli DANA 50rb">💳 DANA 50.000</SelectItem>
+                                  <SelectItem value="Beli DANA 100rb">💳 DANA 100.000</SelectItem>
+                                  <SelectItem value="Beli DANA 200rb">💳 DANA 200.000</SelectItem>
+                                  
+                                  <SelectItem value="Beli ShopeePay 25rb">💳 ShopeePay 25.000</SelectItem>
+                                  <SelectItem value="Beli ShopeePay 50rb">💳 ShopeePay 50.000</SelectItem>
+                                  <SelectItem value="Beli ShopeePay 100rb">💳 ShopeePay 100.000</SelectItem>
+                                  
+                                  {/* PLN Prabayar */}
                                   <SelectItem value="Beli token PLN 20rb">⚡ Token PLN 20.000</SelectItem>
                                   <SelectItem value="Beli token PLN 50rb">⚡ Token PLN 50.000</SelectItem>
                                   <SelectItem value="Beli token PLN 100rb">⚡ Token PLN 100.000</SelectItem>
+                                  <SelectItem value="Beli token PLN 200rb">⚡ Token PLN 200.000</SelectItem>
+                                  <SelectItem value="Beli token PLN 500rb">⚡ Token PLN 500.000</SelectItem>
                                   
-                                  <SelectItem value="Beli diamond Mobile Legends 86">🎮 Mobile Legends 86 Diamond</SelectItem>
-                                  <SelectItem value="Beli diamond Mobile Legends 172">🎮 Mobile Legends 172 Diamond</SelectItem>
-                                  <SelectItem value="Beli diamond Free Fire 70">🎮 Free Fire 70 Diamond</SelectItem>
+                                  {/* Streaming & TV */}
+                                  <SelectItem value="Beli Netflix 1 bulan">📺 Netflix 1 Bulan</SelectItem>
+                                  <SelectItem value="Beli Disney+ 1 bulan">📺 Disney+ 1 Bulan</SelectItem>
+                                  <SelectItem value="Beli Spotify Premium 1 bulan">🎵 Spotify Premium 1 Bulan</SelectItem>
+                                  <SelectItem value="Beli YouTube Premium 1 bulan">📺 YouTube Premium 1 Bulan</SelectItem>
+                                  <SelectItem value="Beli Vidio Premier 1 bulan">📺 Vidio Premier 1 Bulan</SelectItem>
                                   
-                                  <SelectItem value="Beli GoPay 50rb">💳 GoPay 50.000</SelectItem>
-                                  <SelectItem value="Beli GoPay 100rb">💳 GoPay 100.000</SelectItem>
-                                  <SelectItem value="Beli OVO 50rb">💳 OVO 50.000</SelectItem>
-                                  <SelectItem value="Beli DANA 50rb">💳 DANA 50.000</SelectItem>
+                                  {/* Paket SMS & Telpon */}
+                                  <SelectItem value="Beli paket nelpon Telkomsel 100 menit">📞 Telkomsel Nelpon 100 Menit</SelectItem>
+                                  <SelectItem value="Beli paket nelpon Indosat 100 menit">📞 Indosat Nelpon 100 Menit</SelectItem>
+                                  <SelectItem value="Beli paket SMS Telkomsel 1000 SMS">💬 Telkomsel 1000 SMS</SelectItem>
+                                  
+                                  {/* === PASCABAYAR === */}
+                                  {/* PLN Pascabayar */}
+                                  <SelectItem value="Bayar tagihan PLN">⚡ Tagihan PLN Pascabayar</SelectItem>
+                                  
+                                  {/* PDAM */}
+                                  <SelectItem value="Bayar tagihan PDAM">💧 Tagihan PDAM</SelectItem>
+                                  
+                                  {/* HP Pascabayar */}
+                                  <SelectItem value="Bayar tagihan Telkomsel Halo">📱 Telkomsel Halo</SelectItem>
+                                  <SelectItem value="Bayar tagihan Indosat Matrix">📱 Indosat Matrix</SelectItem>
+                                  <SelectItem value="Bayar tagihan XL Postpaid">📱 XL Postpaid</SelectItem>
+                                  
+                                  {/* Internet Pascabayar */}
+                                  <SelectItem value="Bayar tagihan IndiHome">🌐 IndiHome</SelectItem>
+                                  <SelectItem value="Bayar tagihan Firstmedia">🌐 Firstmedia</SelectItem>
+                                  <SelectItem value="Bayar tagihan MNC Play">🌐 MNC Play</SelectItem>
+                                  <SelectItem value="Bayar tagihan Biznet">🌐 Biznet</SelectItem>
+                                  
+                                  {/* BPJS */}
+                                  <SelectItem value="Bayar BPJS Kesehatan">🏥 BPJS Kesehatan</SelectItem>
+                                  <SelectItem value="Bayar BPJS Ketenagakerjaan">👷 BPJS Ketenagakerjaan</SelectItem>
+                                  
+                                  {/* Asuransi & Multifinance */}
+                                  <SelectItem value="Bayar asuransi FWD">🛡️ FWD Insurance</SelectItem>
+                                  <SelectItem value="Bayar finance Adira">💰 Adira Finance</SelectItem>
+                                  <SelectItem value="Bayar finance BAF">💰 BAF Finance</SelectItem>
+                                  
+                                  {/* TV Pascabayar */}
+                                  <SelectItem value="Bayar tagihan Indovision">📺 Indovision</SelectItem>
+                                  <SelectItem value="Bayar tagihan Orange TV">📺 Orange TV</SelectItem>
+                                  <SelectItem value="Bayar tagihan K-Vision">📺 K-Vision</SelectItem>
+                                  
+                                  {/* Pajak & PBB */}
+                                  <SelectItem value="Bayar PBB">🏠 PBB (Pajak Bumi Bangunan)</SelectItem>
+                                  <SelectItem value="Bayar SAMSAT">🚗 SAMSAT</SelectItem>
+                                  
+                                  {/* Gas */}
+                                  <SelectItem value="Bayar tagihan Gas Negara">🔥 Gas Negara (PGN)</SelectItem>
                                 </SelectContent>
                               </Select>
                             </div>
