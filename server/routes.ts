@@ -46,7 +46,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               name: dfProduct.product_name,
               price: dfProduct.price,
               adminFee: calculateAdminFee(dfProduct.price),
-              isActive: dfProduct.status === 'available' || dfProduct.status === 'normal'
+              isActive: dfProduct.buyer_product_status === true && dfProduct.seller_product_status === true
             };
             
             await storage.createProduct(product);
