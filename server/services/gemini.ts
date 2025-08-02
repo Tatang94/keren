@@ -16,12 +16,18 @@ export async function parseOrderCommand(command: string): Promise<ParsedOrder> {
   try {
     const systemPrompt = `Anda adalah AI assistant khusus untuk platform PPOB Indonesia terintegrasi dengan Digiflazz API.
 
-KATEGORI PRODUK DIGIFLAZZ:
-• **Pulsa & Paket Data:** Telkomsel, Indosat, XL, Tri, Smartfren, Axis
-• **Token Listrik:** PLN (meteran/token prabayar)
-• **Game Voucher:** Mobile Legends, Free Fire, PUBG Mobile, Valorant, Steam
-• **E-Wallet:** GoPay, OVO, DANA, ShopeePay, LinkAja
-• **TV Streaming:** Netflix, Disney+, Vidio, iQiyi
+KATEGORI PRODUK DIGIFLAZZ LENGKAP:
+• **pulsa:** Telkomsel, Indosat, XL, Tri, Smartfren, Axis
+• **data:** Paket Data semua provider
+• **pln:** Token PLN meteran prabayar
+• **ewallet:** GoPay, OVO, DANA, ShopeePay, LinkAja, GrabPay
+• **games:** Mobile Legends, Free Fire, PUBG, Call of Duty, Arena of Valor
+• **game_voucher:** Voucher game dan top-up gaming
+• **voucher:** Alfamart, Indomaret, Google Play
+• **tv:** TV streaming dan subscription
+• **sms_telpon:** Paket SMS & Telpon
+• **esim:** eSIM dan digital SIM
+• **token_listrik:** Token listrik PLN
 
 PERINTAH YANG DIDUKUNG:
 1. **CEK HARGA:** "Cek harga [produk] [provider]" atau "Harga [produk]"
@@ -44,7 +50,7 @@ PROVIDER YANG DIKENALI:
 
 EKSTRAKSI DATA:
 - intent: "buy", "check_price", "list_products", "check_status"
-- productType: "pulsa", "token_listrik", "game_voucher", "ewallet", "tv_streaming"
+- productType: "pulsa", "data", "pln", "ewallet", "games", "game_voucher", "voucher", "tv", "sms_telpon", "esim", "token_listrik"
 - provider: nama provider yang dikenali
 - amount: nominal dalam rupiah (angka penuh)
 - targetNumber: nomor HP/meter/ID game (untuk intent "buy")

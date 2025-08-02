@@ -87,24 +87,23 @@ export class MemStorage implements IStorage {
         return;
       }
       
-      // Convert Digiflazz products to our format
+      // Convert ALL Digiflazz products to our format without any restrictions
       digiflazzProducts.forEach(dfProduct => {
-        if (dfProduct.status === 'available') {
-          const category = this.mapDigiflazzCategory(dfProduct.category);
-          const provider = this.mapDigiflazzBrand(dfProduct.brand);
-          
-          const product: Product = {
-            id: dfProduct.buyer_sku_code,
-            category: category,
-            provider: provider.toLowerCase(),
-            name: dfProduct.product_name,
-            price: dfProduct.price,
-            adminFee: this.calculateAdminFee(dfProduct.price),
-            isActive: true
-          };
-          
-          this.products.set(product.id, product);
-        }
+        // Accept all products regardless of status to get full catalog
+        const category = this.mapDigiflazzCategory(dfProduct.category);
+        const provider = this.mapDigiflazzBrand(dfProduct.brand);
+        
+        const product: Product = {
+          id: dfProduct.buyer_sku_code,
+          category: category,
+          provider: provider.toLowerCase(),
+          name: dfProduct.product_name || `${dfProduct.brand} ${dfProduct.category}`,
+          price: dfProduct.price,
+          adminFee: this.calculateAdminFee(dfProduct.price),
+          isActive: dfProduct.buyer_product_status === true && dfProduct.seller_product_status === true
+        };
+        
+        this.products.set(product.id, product);
       });
       
       console.log(`Synced ${digiflazzProducts.length} products from Digiflazz`);
@@ -114,48 +113,50 @@ export class MemStorage implements IStorage {
   }
 
   private mapDigiflazzCategory(dfCategory: string): string {
-    // Mapping berdasarkan kategori sebenarnya dari API Digiflazz
+    // Mapping berdasarkan kategori sebenarnya dari API Digiflazz - LENGKAP
     const categoryMap: Record<string, string> = {
       'Pulsa': 'pulsa',
-      'Data': 'pulsa', // Paket data masuk kategori pulsa
-      'E-Money': 'ewallet',
-      'Voucher': 'game_voucher',
-      'Aktivasi Voucher': 'game_voucher',
-      'Paket SMS & Telpon': 'pulsa',
-      'Games': 'game_voucher',
-      'TV': 'tv_streaming',
-      'PLN': 'token_listrik',
-      'eSIM': 'pulsa'
+      'Data': 'data',
+      'E-Money': 'ewallet', 
+      'Voucher': 'voucher',
+      'Aktivasi Voucher': 'voucher',
+      'Paket SMS & Telpon': 'sms_telpon',
+      'Games': 'games',
+      'TV': 'tv',
+      'PLN': 'pln',
+      'eSIM': 'esim',
+      'Streaming': 'streaming',
+      'China TOPUP': 'china_topup',
+      'Malaysia TOPUP': 'malaysia_topup',
+      'Philippines TOPUP': 'philippines_topup',
+      'Singapore TOPUP': 'singapore_topup',
+      'Thailand TOPUP': 'thailand_topup',
+      'Vietnam Topup': 'vietnam_topup',
+      'Media Sosial': 'media_sosial',
+      'Masa Aktif': 'masa_aktif',
+      'Bundling': 'bundling',
+      'Aktivasi Perdana': 'aktivasi_perdana',
+      'Gas': 'gas',
+      'PLN PASCABAYAR': 'pln_pascabayar',
+      'PDAM': 'pdam',
+      'HP PASCABAYAR': 'hp_pascabayar',
+      'INTERNET PASCABAYAR': 'internet_pascabayar',
+      'BPJS KESEHATAN': 'bpjs_kesehatan',
+      'MULTIFINANCE': 'multifinance',
+      'PBB': 'pbb',
+      'GAS NEGARA': 'gas_negara',
+      'TV PASCABAYAR': 'tv_pascabayar',
+      'SAMSAT': 'samsat',
+      'BPJS KETENAGAKERJAAN': 'bpjs_ketenagakerjaan',
+      'PLN NONTAGLIS': 'pln_nontaglis'
     };
-    return categoryMap[dfCategory] || 'pulsa';
+    return categoryMap[dfCategory] || dfCategory.toLowerCase().replace(/\s+/g, '_');
   }
 
   private mapDigiflazzBrand(dfBrand: string): string {
-    // Mapping berdasarkan brand sebenarnya dari API Digiflazz
-    const brandMap: Record<string, string> = {
-      'TELKOMSEL': 'telkomsel',
-      'INDOSAT': 'indosat',
-      'XL': 'xl',
-      'TRI': 'tri',
-      'SMARTFREN': 'smartfren',
-      'AXIS': 'axis',
-      'by.U': 'byu',
-      'PLN': 'pln',
-      'FREE FIRE': 'free_fire',
-      'PUBG MOBILE': 'pubg',
-      'Call of Duty MOBILE': 'cod_mobile',
-      'GOOGLE PLAY INDONESIA': 'google_play',
-      'Minecraft': 'minecraft',
-      'Mango Live': 'mango_live',
-      'OVO': 'ovo',
-      'DANA': 'dana',
-      'GRAB': 'grab',
-      'TAPCASH BNI': 'tapcash',
-      'MANDIRI E-TOLL': 'mandiri_etoll',
-      'BRI BRIZZI': 'brizzi',
-      'INDOMARET': 'indomaret'
-    };
-    return brandMap[dfBrand.toUpperCase()] || dfBrand.toLowerCase().replace(/\s+/g, '_');
+    // Return ALL brands without restrictions - preserve original name
+    if (!dfBrand) return 'unknown';
+    return dfBrand.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
   }
 
   private calculateAdminFee(price: number): number {

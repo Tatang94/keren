@@ -7,7 +7,15 @@ interface DigiflazzProduct {
   brand: string;
   type: string;
   price: number;
-  status: string;
+  seller_name: string;
+  buyer_product_status: boolean;
+  seller_product_status: boolean;
+  unlimited_stock: boolean;
+  stock: number;
+  multi: boolean;
+  start_cut_off: string;
+  end_cut_off: string;
+  desc: string;
 }
 
 interface DigiflazzTransactionRequest {
@@ -88,13 +96,9 @@ export class DigiflazzService {
           console.log('📦 Contoh produk:', JSON.stringify(data.data[0], null, 2));
         }
         
-        // Filter produk aktif berdasarkan status yang tersedia
-        const activeProducts = data.data.filter((product: any) => 
-          product.buyer_product_status === true
-        );
-        
-        console.log(`📊 Produk aktif: ${activeProducts.length}/${data.data.length}`);
-        return activeProducts.length > 0 ? activeProducts : data.data;
+        // Return ALL products without filtering to get complete catalog
+        console.log(`📊 Total produk: ${data.data.length} (semua produk diambil tanpa filter)`);
+        return data.data;
       } else {
         console.log('❌ Response tidak sesuai format:', data);
         return [];
