@@ -88,13 +88,13 @@ export class DigiflazzService {
           console.log('📦 Contoh produk:', JSON.stringify(data.data[0], null, 2));
         }
         
-        // Filter produk yang aktif saja
-        const activeProducts = data.data.filter((product: DigiflazzProduct) => 
-          product.status === 'available' || product.status === 'normal'
+        // Filter produk aktif berdasarkan status yang tersedia
+        const activeProducts = data.data.filter((product: any) => 
+          product.buyer_product_status === true
         );
         
         console.log(`📊 Produk aktif: ${activeProducts.length}/${data.data.length}`);
-        return activeProducts;
+        return activeProducts.length > 0 ? activeProducts : data.data;
       } else {
         console.log('❌ Response tidak sesuai format:', data);
         return [];
@@ -109,53 +109,51 @@ export class DigiflazzService {
     try {
       // Ambil semua produk dari Digiflazz
       const products = await this.getProducts();
+      console.log(`🔍 Mencari produk: ${productType} ${provider} ${amount} dari ${products.length} produk`);
       
-      // Map kategori internal ke kategori Digiflazz
-      const categoryMap: Record<string, string[]> = {
-        'pulsa': ['Pulsa', 'Paket Data'],
-        'token_listrik': ['PLN', 'Token Listrik'],
-        'game_voucher': ['Games', 'Voucher Game'],
-        'ewallet': ['E-Money', 'E-Wallet'],
-        'tv_streaming': ['TV', 'Streaming']
-      };
-
-      const allowedCategories = categoryMap[productType];
-      if (!allowedCategories) {
-        console.log(`❌ Kategori produk tidak dikenali: ${productType}`);
-        return null;
-      }
-
-      // Filter produk berdasarkan kategori, brand, dan nominal
-      const matchingProducts = products.filter(product => {
-        const categoryMatch = allowedCategories.some(cat => 
-          product.category.toLowerCase().includes(cat.toLowerCase())
-        );
-        const brandMatch = product.brand.toLowerCase().includes(provider.toLowerCase());
+      // Cari produk berdasarkan brand dan kategori dulu
+      const brandProducts = products.filter(product => 
+        product.brand.toLowerCase().includes(provider.toLowerCase()) &&
+        (product.category.toLowerCase().includes('pulsa') || 
+         product.category.toLowerCase().includes('data'))
+      );
+      
+      console.log(`📦 Produk ${provider}: ${brandProducts.length} ditemukan`);
+      
+      if (brandProducts.length > 0) {
+        // Log beberapa produk untuk debugging
+        console.log('🎯 Contoh produk yang ditemukan:', 
+          brandProducts.slice(0, 3).map(p => `${p.product_name} (${p.price})`).join(', '));
         
-        // Untuk pulsa dan token listrik, cocokkan nominal dari nama produk
-        const nameMatch = product.product_name.toLowerCase().includes(amount.toString()) ||
-                         product.product_name.toLowerCase().includes((amount/1000).toString() + 'k') ||
-                         product.product_name.toLowerCase().includes((amount/1000).toString() + '.000');
+        // Cari yang sesuai nominal dengan toleransi
+        const exactMatch = brandProducts.find(product => {
+          const productName = product.product_name.toLowerCase();
+          const amountStr = amount.toString();
+          const amountK = (amount/1000).toString();
+          
+          return productName.includes(amountStr) ||
+                 productName.includes(amountK + '.000') ||
+                 productName.includes(amountK + 'k') ||
+                 Math.abs(product.price - amount) <= 1000;
+        });
         
-        return categoryMatch && brandMatch && nameMatch;
-      });
-
-      if (matchingProducts.length > 0) {
-        console.log(`✅ Ditemukan ${matchingProducts.length} produk matching:`, 
-          matchingProducts.map(p => p.product_name).join(', '));
+        if (exactMatch) {
+          console.log(`✅ Exact match: ${exactMatch.product_name} (${exactMatch.buyer_sku_code})`);
+          return exactMatch.buyer_sku_code;
+        }
         
-        // Pilih produk dengan harga paling dekat
-        const closestProduct = matchingProducts.reduce((prev, curr) => {
+        // Jika tidak ada exact match, ambil yang terdekat harganya
+        const closest = brandProducts.reduce((prev, curr) => {
           const prevDiff = Math.abs(prev.price - amount);
           const currDiff = Math.abs(curr.price - amount);
           return currDiff < prevDiff ? curr : prev;
         });
         
-        console.log(`🎯 Produk terpilih: ${closestProduct.product_name} (${closestProduct.buyer_sku_code})`);
-        return closestProduct.buyer_sku_code;
+        console.log(`🎯 Closest match: ${closest.product_name} (${closest.price}) - ${closest.buyer_sku_code}`);
+        return closest.buyer_sku_code;
       }
 
-      console.log(`❌ Tidak ditemukan produk: ${productType} ${provider} ${amount}`);
+      console.log(`❌ Tidak ditemukan produk ${provider}`);
       return null;
     } catch (error) {
       console.error('❌ Error mencari produk Digiflazz:', error);
