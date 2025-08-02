@@ -49,7 +49,7 @@ export default function ChatInterface({ isOpen, onClose, onProductSelect }: Chat
 
   // Group products by category and provider for dropdown
   const groupedProducts = React.useMemo(() => {
-    if (!products || products.length === 0) return {};
+    if (!Array.isArray(products) || products.length === 0) return {};
     
     const groups: Record<string, Record<string, any[]>> = {};
     
@@ -276,14 +276,14 @@ export default function ChatInterface({ isOpen, onClose, onProductSelect }: Chat
                                   <SelectValue placeholder="Pilih produk yang ingin dibeli..." />
                                 </SelectTrigger>
                                 <SelectContent className="max-h-96">
-                                  {!products || products.length === 0 ? (
+                                  {!Array.isArray(products) || products.length === 0 ? (
                                     <div className="text-center py-4 text-gray-500">Loading produk...</div>
                                   ) : (
                                     <>
                                       {Object.entries(groupedProducts).map(([category, providers]) => {
                                         const categoryConfig = getCategoryConfig(category);
                                         return (
-                                          <React.Fragment key={category}>
+                                          <div key={category}>
                                             <div className={`font-bold text-sm px-2 py-1 border-b ${categoryConfig.headerClass}`}>
                                               {categoryConfig.icon} {categoryConfig.name}
                                             </div>
@@ -291,7 +291,7 @@ export default function ChatInterface({ isOpen, onClose, onProductSelect }: Chat
                                             {Object.entries(providers).map(([provider, productList]) => {
                                               const providerConfig = getProviderConfig(provider, category);
                                               return (
-                                                <React.Fragment key={`${category}-${provider}`}>
+                                                <div key={`${category}-${provider}`}>
                                                   <div className="font-medium text-xs text-gray-600 px-3 py-1 bg-gray-50">
                                                     {providerConfig.icon} {providerConfig.name}
                                                   </div>
@@ -303,10 +303,10 @@ export default function ChatInterface({ isOpen, onClose, onProductSelect }: Chat
                                                       {categoryConfig.icon} {product.name} - Rp {product.price?.toLocaleString('id-ID') || 'N/A'}
                                                     </SelectItem>
                                                   ))}
-                                                </React.Fragment>
+                                                </div>
                                               );
                                             })}
-                                          </React.Fragment>
+                                          </div>
                                         );
                                       })}
                                     </>
