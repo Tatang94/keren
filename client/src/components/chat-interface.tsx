@@ -102,6 +102,19 @@ export default function ChatInterface({ isOpen, onClose, onProductSelect }: Chat
     }
   };
 
+  const handleQuickAction = (command: string) => {
+    const userMessage: ChatMessage = {
+      id: Date.now().toString(),
+      type: 'user',
+      message: command,
+      timestamp: new Date()
+    };
+
+    console.log('Sending message:', command);
+    setMessages(prev => [...prev, userMessage]);
+    processChatMutation.mutate(command);
+  };
+
 
 
   return (
@@ -176,12 +189,133 @@ export default function ChatInterface({ isOpen, onClose, onProductSelect }: Chat
         </div>
         
         <div className="p-6 border-t border-gray-200">
+          {/* Quick Action Buttons */}
+          <div className="mb-4">
+            <p className="text-sm font-medium text-gray-700 mb-3">🚀 Perintah Cepat:</p>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 mb-4">
+              {/* Pulsa Actions */}
+              <Button
+                size="sm"
+                variant="outline"
+                className="text-xs h-8 justify-start"
+                onClick={() => handleQuickAction("Cek harga pulsa Telkomsel")}
+                disabled={processChatMutation.isPending}
+              >
+                📱 Pulsa Telkomsel
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                className="text-xs h-8 justify-start"
+                onClick={() => handleQuickAction("Cek harga pulsa Indosat")}
+                disabled={processChatMutation.isPending}
+              >
+                📱 Pulsa Indosat
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                className="text-xs h-8 justify-start"
+                onClick={() => handleQuickAction("Cek harga pulsa XL")}
+                disabled={processChatMutation.isPending}
+              >
+                📱 Pulsa XL
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                className="text-xs h-8 justify-start"
+                onClick={() => handleQuickAction("Cek harga pulsa Tri")}
+                disabled={processChatMutation.isPending}
+              >
+                📱 Pulsa Tri
+              </Button>
+              
+              {/* Popular Product Actions */}
+              <Button
+                size="sm"
+                variant="outline"
+                className="text-xs h-8 justify-start"
+                onClick={() => handleQuickAction("Beli pulsa Telkomsel 10rb")}
+                disabled={processChatMutation.isPending}
+              >
+                💰 Tsel 10rb
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                className="text-xs h-8 justify-start"
+                onClick={() => handleQuickAction("Beli pulsa Telkomsel 25rb")}
+                disabled={processChatMutation.isPending}
+              >
+                💰 Tsel 25rb
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                className="text-xs h-8 justify-start"
+                onClick={() => handleQuickAction("Beli pulsa Tri 5rb")}
+                disabled={processChatMutation.isPending}
+              >
+                💰 Tri 5rb
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                className="text-xs h-8 justify-start"
+                onClick={() => handleQuickAction("Token PLN 20rb")}
+                disabled={processChatMutation.isPending}
+              >
+                ⚡ PLN 20rb
+              </Button>
+              
+              {/* Game & E-wallet */}
+              <Button
+                size="sm"
+                variant="outline"
+                className="text-xs h-8 justify-start"
+                onClick={() => handleQuickAction("List voucher Mobile Legends")}
+                disabled={processChatMutation.isPending}
+              >
+                🎮 Mobile Legends
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                className="text-xs h-8 justify-start"
+                onClick={() => handleQuickAction("List voucher Free Fire")}
+                disabled={processChatMutation.isPending}
+              >
+                🎮 Free Fire
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                className="text-xs h-8 justify-start"
+                onClick={() => handleQuickAction("List produk Dana")}
+                disabled={processChatMutation.isPending}
+              >
+                💳 E-wallet Dana
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                className="text-xs h-8 justify-start"
+                onClick={() => handleQuickAction("List produk OVO")}
+                disabled={processChatMutation.isPending}
+              >
+                💳 E-wallet OVO
+              </Button>
+            </div>
+          </div>
+
+          {/* Manual Input */}
           <div className="flex items-center space-x-3">
             <Input
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyPress={handleKeyPress}
-              placeholder="Ketik perintah pembelian Anda..."
+              placeholder="Atau ketik perintah manual: Beli pulsa Telkomsel 50rb untuk 081234567890"
               className="flex-1"
               disabled={processChatMutation.isPending}
             />
