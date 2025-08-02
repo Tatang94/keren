@@ -129,14 +129,220 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (parsedOrder.confidence === 0) {
         return res.json({
           success: false,
-          message: "Maaf, saya hanya dapat membantu dengan pembelian produk digital PPOB seperti pulsa, token listrik, game voucher, dan top up e-wallet.\n\nContoh perintah:\n• Beli pulsa Telkomsel 50rb untuk 081234567890\n• Token listrik PLN 100rb meter 12345678901\n• Top up GoPay 200rb ke 081234567890\n• Voucher Mobile Legends 100rb untuk 081234567890"
+          message: "Maaf, saya hanya dapat membantu dengan layanan PPOB Digiflazz:\n\n🔍 **Cek Harga:** \"Cek harga pulsa Telkomsel\"\n💰 **Transaksi:** \"Beli pulsa Telkomsel 50rb untuk 081234567890\"\n📋 **List Produk:** \"List voucher Mobile Legends\"\n📊 **Status:** \"Status transaksi [ID]\""
         });
       }
       
-      if (parsedOrder.confidence < 0.7) {
+      if (parsedOrder.confidence < 0.8) {
         return res.json({
           success: false,
-          message: "Perintah kurang jelas. Silakan gunakan format yang lebih spesifik:\n\nContoh:\n• Beli pulsa [provider] [nominal] untuk [nomor]\n• Token listrik PLN [nominal] meter [nomor meter]\n• Top up [e-wallet] [nominal] ke [nomor]\n• Voucher [game] [nominal] untuk [nomor]"
+          message: "Perintah kurang jelas. Gunakan format yang lebih spesifik:\n\n📱 **Cek Harga:** Cek harga [kategori] [provider]\n🛒 **Beli:** Beli [produk] [nominal] untuk [nomor]\n📋 **List:** List produk [kategori]\n📊 **Status:** Status transaksi [ID]"
+        });
+      }
+
+      // Handle different intents
+      switch (parsedOrder.intent) {
+        case "check_price":
+          return await handleCheckPrice(parsedOrder, res);
+        
+        case "list_products":
+          return await handleListProducts(parsedOrder, res);
+          
+        case "check_status":
+          return await handleCheckStatus(parsedOrder, res);
+          
+        case "buy":
+          return await handleBuyProduct(parsedOrder, res);
+          
+        default:
+          return res.json({
+            success: false,
+            message: "Intent tidak dikenali. Gunakan perintah: cek harga, list produk, beli, atau status transaksi."
+          });
+      }
+
+    } catch (error) {
+      console.error('Error processing chat command:', error);
+      const errorMsg = await generateErrorMessage("Terjadi kesalahan sistem");
+      res.status(500).json({ 
+        success: false, 
+        message: errorMsg
+      });
+    }
+  });
+
+  // Handler functions for different intents
+  async function handleCheckPrice(parsedOrder: any, res: any) {
+    try {
+      let products = await storage.getProductsByCategory(parsedOrder.productType);
+      
+      if (parsedOrder.provider) {
+        products = products.filter(p => 
+          p.provider.toLowerCase().includes(parsedOrder.provider.toLowerCase())
+        );
+      }
+
+      if (products.length === 0) {
+        return res.json({
+          success: false,
+          message: `Produk ${parsedOrder.productType} ${parsedOrder.provider || ''} tidak ditemukan.`
+        });
+      }
+
+      // Group products by price
+      const priceGroups = products.reduce((acc: any, product: any) => {
+        if (!acc[product.price]) {
+          acc[product.price] = [];
+        }
+        acc[product.price].push(product);
+        return acc;
+      }, {});
+
+      let message = `📋 **Daftar Harga ${parsedOrder.productType.toUpperCase()} ${parsedOrder.provider?.toUpperCase() || ''}:**\n\n`;
+      
+      Object.keys(priceGroups)
+        .sort((a, b) => parseInt(a) - parseInt(b))
+        .slice(0, 10) // Limit to 10 items
+        .forEach(price => {
+          const product = priceGroups[price][0];
+          const totalPrice = product.price + product.adminFee;
+          message += `💰 **Rp ${parseInt(price).toLocaleString('id-ID')}** (+ admin Rp ${product.adminFee.toLocaleString('id-ID')} = **Rp ${totalPrice.toLocaleString('id-ID')}**)\n`;
+          message += `   ${product.name}\n\n`;
+        });
+
+      message += `\n💡 Untuk membeli: "Beli ${parsedOrder.productType} ${parsedOrder.provider || '[provider]'} [nominal] untuk [nomor]"`;
+
+      return res.json({
+        success: true,
+        message
+      });
+    } catch (error) {
+      return res.json({
+        success: false,
+        message: "Gagal mengambil data harga produk."
+      });
+    }
+  }
+
+  async function handleListProducts(parsedOrder: any, res: any) {
+    try {
+      let products = await storage.getProductsByCategory(parsedOrder.productType);
+      
+      if (parsedOrder.provider) {
+        products = products.filter(p => 
+          p.provider.toLowerCase().includes(parsedOrder.provider.toLowerCase())
+        );
+      }
+
+      if (products.length === 0) {
+        return res.json({
+          success: false,
+          message: `Tidak ada produk ${parsedOrder.productType} ${parsedOrder.provider || ''} yang tersedia.`
+        });
+      }
+
+      // Group by provider
+      const providerGroups = products.reduce((acc: any, product: any) => {
+        if (!acc[product.provider]) {
+          acc[product.provider] = [];
+        }
+        acc[product.provider].push(product);
+        return acc;
+      }, {});
+
+      let message = `📋 **Produk ${parsedOrder.productType.toUpperCase()} Tersedia:**\n\n`;
+      
+      Object.keys(providerGroups).slice(0, 5).forEach(provider => {
+        const providerProducts = providerGroups[provider];
+        message += `🏷️ **${provider.toUpperCase()}** (${providerProducts.length} produk)\n`;
+        
+        providerProducts.slice(0, 3).forEach((product: any) => {
+          const totalPrice = product.price + product.adminFee;
+          message += `   • Rp ${product.price.toLocaleString('id-ID')} (Total: Rp ${totalPrice.toLocaleString('id-ID')})\n`;
+        });
+        
+        if (providerProducts.length > 3) {
+          message += `   • ... dan ${providerProducts.length - 3} produk lainnya\n`;
+        }
+        message += '\n';
+      });
+
+      message += `\n💡 Untuk cek harga detail: "Cek harga ${parsedOrder.productType} [provider]"`;
+
+      return res.json({
+        success: true,
+        message
+      });
+    } catch (error) {
+      return res.json({
+        success: false,
+        message: "Gagal mengambil daftar produk."
+      });
+    }
+  }
+
+  async function handleCheckStatus(parsedOrder: any, res: any) {
+    try {
+      if (!parsedOrder.transactionId) {
+        return res.json({
+          success: false,
+          message: "ID transaksi diperlukan. Contoh: \"Status transaksi TXN123456\""
+        });
+      }
+
+      const transaction = await storage.getTransactionById(parsedOrder.transactionId);
+      
+      if (!transaction) {
+        return res.json({
+          success: false,
+          message: `Transaksi dengan ID ${parsedOrder.transactionId} tidak ditemukan.`
+        });
+      }
+
+      let statusIcon = "⏳";
+      let statusText = "Menunggu";
+      
+      switch (transaction.status) {
+        case "completed":
+          statusIcon = "✅";
+          statusText = "Berhasil";
+          break;
+        case "failed":
+          statusIcon = "❌";
+          statusText = "Gagal";
+          break;
+        case "pending":
+          statusIcon = "⏳";
+          statusText = "Pending";
+          break;
+      }
+
+      const message = `📊 **Status Transaksi ${transaction.id}**\n\n` +
+                     `${statusIcon} **Status:** ${statusText}\n` +
+                     `📱 **Produk:** ${transaction.productName}\n` +
+                     `🎯 **Tujuan:** ${transaction.targetNumber}\n` +
+                     `💰 **Total:** Rp ${transaction.totalAmount.toLocaleString('id-ID')}\n` +
+                     `📅 **Waktu:** ${transaction.createdAt.toLocaleString('id-ID')}\n\n` +
+                     (transaction.status === "pending" ? "⏳ Transaksi sedang diproses..." : "");
+
+      return res.json({
+        success: true,
+        message
+      });
+    } catch (error) {
+      return res.json({
+        success: false,
+        message: "Gagal mengecek status transaksi."
+      });
+    }
+  }
+
+  async function handleBuyProduct(parsedOrder: any, res: any) {
+    try {
+      if (!parsedOrder.targetNumber) {
+        return res.json({
+          success: false,
+          message: "Nomor tujuan diperlukan untuk transaksi. Contoh: \"Beli pulsa Telkomsel 50rb untuk 081234567890\""
         });
       }
 
@@ -145,7 +351,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       if (parsedOrder.provider) {
         products = products.filter(p => 
-          p.provider.toLowerCase().includes(parsedOrder.provider!.toLowerCase())
+          p.provider.toLowerCase().includes(parsedOrder.provider.toLowerCase())
         );
       }
       
@@ -172,7 +378,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         product.adminFee
       );
 
-      res.json({
+      return res.json({
         success: true,
         message: confirmationMsg,
         productData: {
@@ -184,16 +390,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           totalAmount: product.price + product.adminFee
         }
       });
-
     } catch (error) {
-      console.error('Error processing chat command:', error);
-      const errorMsg = await generateErrorMessage("Terjadi kesalahan sistem");
-      res.status(500).json({ 
-        success: false, 
-        message: errorMsg
+      return res.json({
+        success: false,
+        message: "Gagal memproses permintaan pembelian."
       });
     }
-  });
+  }
 
   // Create transaction and payment
   app.post("/api/transactions", async (req, res) => {

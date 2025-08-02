@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Bot, User, Send, Mic } from "lucide-react";
+import { Bot, User, Send } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -27,12 +27,12 @@ export default function ChatInterface({ isOpen, onClose, onProductSelect }: Chat
     {
       id: '1',
       type: 'ai',
-      message: 'Halo! Saya PPOB Assistant yang siap membantu pembelian produk digital Anda.\n\nContoh perintah:\n• "Beli pulsa Telkomsel 50rb untuk 081234567890"\n• "Token listrik PLN 100rb meter 12345678901"\n• "Top up GoPay 200rb ke 081234567890"\n• "Voucher Mobile Legends 100rb untuk 081234567890"\n\nKetik perintah Anda...',
+      message: 'Halo! Saya PPOB Assistant yang terintegrasi dengan Digiflazz. Saya siap membantu:\n\n🔍 **Cek Harga Produk:**\n• "Cek harga pulsa Telkomsel"\n• "Harga token PLN 50rb"\n• "List voucher Mobile Legends"\n\n💰 **Transaksi:**\n• "Beli pulsa Telkomsel 50rb untuk 081234567890"\n• "Token listrik PLN 100rb meter 12345678901"\n• "Voucher ML 172 diamond untuk 081234567890"\n\n📊 **Info Lainnya:**\n• "Status transaksi [ID]"\n• "Produk tersedia kategori pulsa"\n\nSilakan ketik perintah Anda...',
       timestamp: new Date()
     }
   ]);
   const [input, setInput] = useState('');
-  const [isListening, setIsListening] = useState(false);
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
@@ -102,55 +102,7 @@ export default function ChatInterface({ isOpen, onClose, onProductSelect }: Chat
     }
   };
 
-  const startVoiceInput = () => {
-    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-      const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
-      const recognition = new SpeechRecognition();
-      
-      recognition.lang = 'id-ID';
-      recognition.continuous = false;
-      recognition.interimResults = false;
 
-      recognition.onstart = () => {
-        setIsListening(true);
-      };
-
-      recognition.onresult = (event: any) => {
-        const transcript = event.results[0][0].transcript;
-        console.log('Voice recognition result:', transcript);
-        setInput(transcript);
-        setIsListening(false);
-        
-        // Auto-send voice input after a short delay
-        setTimeout(() => {
-          if (transcript.trim()) {
-            handleSendMessage();
-          }
-        }, 500);
-      };
-
-      recognition.onerror = () => {
-        setIsListening(false);
-        toast({
-          title: "Error",
-          description: "Gagal mengenali suara. Silakan coba lagi.",
-          variant: "destructive"
-        });
-      };
-
-      recognition.onend = () => {
-        setIsListening(false);
-      };
-
-      recognition.start();
-    } else {
-      toast({
-        title: "Not Supported",
-        description: "Fitur voice input tidak didukung di browser ini.",
-        variant: "destructive"
-      });
-    }
-  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -240,20 +192,7 @@ export default function ChatInterface({ isOpen, onClose, onProductSelect }: Chat
             >
               <Send className="h-4 w-4" />
             </Button>
-            <Button 
-              onClick={startVoiceInput}
-              variant="outline"
-              disabled={isListening || processChatMutation.isPending}
-              className={isListening ? "animate-pulse" : ""}
-            >
-              <Mic className="h-4 w-4" />
-            </Button>
           </div>
-          {isListening && (
-            <p className="text-sm text-primary mt-2 text-center">
-              Mendengarkan... Silakan bicara
-            </p>
-          )}
         </div>
       </DialogContent>
     </Dialog>
