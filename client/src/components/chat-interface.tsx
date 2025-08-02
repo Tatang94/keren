@@ -269,42 +269,42 @@ export default function ChatInterface({ isOpen, onClose, onProductSelect }: Chat
                 ⚡ PLN 20rb
               </Button>
               
-              {/* Game & E-wallet */}
+              {/* Game Voucher & E-wallet */}
               <Button
                 size="sm"
                 variant="outline"
                 className="text-xs h-8 justify-start"
-                onClick={() => handleQuickAction("List voucher Mobile Legends")}
+                onClick={() => handleQuickAction("List game voucher")}
                 disabled={processChatMutation.isPending}
               >
-                🎮 Mobile Legends
+                🎮 Game Voucher
               </Button>
               <Button
                 size="sm"
                 variant="outline"
                 className="text-xs h-8 justify-start"
-                onClick={() => handleQuickAction("List voucher Free Fire")}
+                onClick={() => handleQuickAction("List produk ewallet")}
                 disabled={processChatMutation.isPending}
               >
-                🎮 Free Fire
+                💳 E-wallet
               </Button>
               <Button
                 size="sm"
                 variant="outline"
                 className="text-xs h-8 justify-start"
-                onClick={() => handleQuickAction("List produk Dana")}
+                onClick={() => handleQuickAction("List token listrik")}
                 disabled={processChatMutation.isPending}
               >
-                💳 E-wallet Dana
+                ⚡ Token Listrik
               </Button>
               <Button
                 size="sm"
                 variant="outline"
                 className="text-xs h-8 justify-start"
-                onClick={() => handleQuickAction("List produk OVO")}
+                onClick={() => handleQuickAction("List semua kategori")}
                 disabled={processChatMutation.isPending}
               >
-                💳 E-wallet OVO
+                📋 Semua Produk
               </Button>
             </div>
           </div>
