@@ -4,9 +4,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import ChatInterface from "@/components/chat-interface";
 
-import TransactionChecker from "@/components/transaction-checker";
 import PaymentModal from "@/components/payment-modal";
-import { Bot, Settings, MessageCircle, ShoppingCart, Search } from "lucide-react";
+import { Bot, Settings, MessageCircle, ShoppingCart } from "lucide-react";
 import { Link } from "wouter";
 
 export default function Home() {
@@ -20,10 +19,6 @@ export default function Home() {
     setShowChat(false);
   };
 
-  const scrollToSection = (sectionId: string) => {
-    document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth' });
-  };
-
   return (
     <div className="min-h-screen bg-gray-50 font-sans">
       {/* Header */}
@@ -35,19 +30,9 @@ export default function Home() {
                 <h1 className="text-2xl font-bold text-primary">PPOB AI</h1>
               </div>
               <nav className="hidden md:flex space-x-8">
-                <button 
-                  onClick={() => scrollToSection('beranda')}
-                  className="text-gray-700 hover:text-primary px-3 py-2 text-sm font-medium"
-                >
-                  Beranda
-                </button>
-
-                <button 
-                  onClick={() => scrollToSection('transaksi')}
-                  className="text-gray-700 hover:text-primary px-3 py-2 text-sm font-medium"
-                >
-                  Cek Transaksi
-                </button>
+                <span className="text-gray-700 px-3 py-2 text-sm font-medium">
+                  PPOB AI Platform
+                </span>
               </nav>
             </div>
             <div className="flex items-center space-x-4">
@@ -87,15 +72,6 @@ export default function Home() {
                 >
                   <MessageCircle className="mr-2 h-5 w-5" />
                   Mulai Chat dengan AI
-                </Button>
-                <Button 
-                  onClick={() => scrollToSection('transaksi')}
-                  variant="outline" 
-                  className="border-2 border-white text-white hover:bg-white hover:text-primary font-semibold"
-                  size="lg"
-                >
-                  <Search className="mr-2 h-5 w-5" />
-                  <span className="text-white hover:text-primary">Cek Transaksi</span>
                 </Button>
               </div>
             </div>
@@ -159,7 +135,7 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             <Card className="text-center p-6 hover:shadow-lg transition-shadow">
               <div className="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Search className="h-8 w-8" />
+                <Bot className="h-8 w-8" />
               </div>
               <h4 className="text-lg font-semibold mb-2">Cek Harga</h4>
               <p className="text-gray-600 text-sm mb-4">Lihat harga semua produk digital terbaru</p>
@@ -212,11 +188,6 @@ export default function Home() {
             </Button>
           </div>
         </div>
-      </section>
-
-      {/* Transaction Status */}
-      <section id="transaksi">
-        <TransactionChecker />
       </section>
 
       {/* Footer */}
