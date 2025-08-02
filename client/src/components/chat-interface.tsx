@@ -275,7 +275,7 @@ export default function ChatInterface({ isOpen, onClose, onProductSelect }: Chat
                                 <SelectTrigger className="w-full">
                                   <SelectValue placeholder="Pilih produk yang ingin dibeli..." />
                                 </SelectTrigger>
-                                <SelectContent className="max-h-96">
+                                <SelectContent className="max-h-[500px]">
                                   {!Array.isArray(products) || products.length === 0 ? (
                                     <div className="text-center py-4 text-gray-500">Loading produk...</div>
                                   ) : (
@@ -295,7 +295,7 @@ export default function ChatInterface({ isOpen, onClose, onProductSelect }: Chat
                                                   <div className="font-medium text-xs text-gray-600 px-3 py-1 bg-gray-50">
                                                     {providerConfig.icon} {providerConfig.name}
                                                   </div>
-                                                  {productList.slice(0, 10).map((product: any) => (
+                                                  {productList.map((product: any) => (
                                                     <SelectItem 
                                                       key={product.id} 
                                                       value={`Beli ${product.name} untuk nomor`}
