@@ -2,6 +2,8 @@ import { sql } from "drizzle-orm";
 import { pgTable, text, varchar, integer, timestamp, real, boolean } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+import { drizzle } from "drizzle-orm/neon-http";
+import { neon } from "@neondatabase/serverless";
 
 export const transactions = pgTable("transactions", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -57,3 +59,7 @@ export type Product = typeof products.$inferSelect;
 export type InsertProduct = z.infer<typeof insertProductSchema>;
 export type AdminStats = typeof adminStats.$inferSelect;
 export type InsertAdminStats = z.infer<typeof insertAdminStatsSchema>;
+
+// Database connection
+const sqlQuery = neon(process.env.DATABASE_URL || "");
+export const db = drizzle(sqlQuery);

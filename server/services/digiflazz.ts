@@ -73,7 +73,19 @@ export class DigiflazzService {
       
 
       
-      return data.data || [];
+      console.log('Digiflazz API Response sample:', JSON.stringify(data, null, 2).substring(0, 500));
+      
+      // Check if data structure is correct
+      if (data.data && Array.isArray(data.data)) {
+        console.log(`Digiflazz returned ${data.data.length} products`);
+        if (data.data.length > 0) {
+          console.log('First product structure:', JSON.stringify(data.data[0], null, 2));
+        }
+        return data.data;
+      } else {
+        console.log('Invalid Digiflazz response structure:', data);
+        return [];
+      }
     } catch (error) {
       console.error('Error fetching Digiflazz products:', error);
       return [];
