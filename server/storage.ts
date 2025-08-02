@@ -268,126 +268,24 @@ export class MemStorage implements IStorage {
     this.adminStats.set(today, stats);
     return stats;
   }
-}
 
-// Use database storage
-import { eq, desc } from "drizzle-orm";
-import { db, transactions, products, adminStats } from "@shared/schema";
-
-export class DbStorage implements IStorage {
   async clearAllProducts(): Promise<void> {
-    await db.delete(products);
+    this.products.clear();
+    this.initializeProducts();
   }
 
-  async getTransaction(id: string): Promise<Transaction | undefined> {
-    const result = await db.select().from(transactions).where(eq(transactions.id, id)).limit(1);
-    return result[0];
+  async getTransactionByPaydisiniRef(ref: string): Promise<Transaction | null> {
+    const transaction = Array.from(this.transactions.values()).find(
+      t => t.paydisiniRef === ref
+    );
+    return transaction || null;
   }
 
   async getTransactionById(id: string): Promise<Transaction | undefined> {
     return this.getTransaction(id);
   }
-
-  async getTransactionsByTargetNumber(targetNumber: string): Promise<Transaction[]> {
-    return db.select().from(transactions)
-      .where(eq(transactions.targetNumber, targetNumber))
-      .orderBy(desc(transactions.createdAt));
-  }
-
-  async getTransactionByPaydisiniRef(ref: string): Promise<Transaction | null> {
-    const result = await db.select().from(transactions).where(eq(transactions.paydisiniRef, ref)).limit(1);
-    return result[0] || null;
-  }
-
-  async createTransaction(transaction: InsertTransaction): Promise<Transaction> {
-    const newTransaction = {
-      id: randomUUID(),
-      ...transaction,
-      createdAt: new Date(),
-      updatedAt: new Date()
-    };
-    
-    await db.insert(transactions).values(newTransaction);
-    return newTransaction as Transaction;
-  }
-
-  async updateTransaction(id: string, updates: Partial<Transaction>): Promise<Transaction | undefined> {
-    await db.update(transactions)
-      .set({ ...updates, updatedAt: new Date() })
-      .where(eq(transactions.id, id));
-    
-    return this.getTransaction(id);
-  }
-
-  async getRecentTransactions(limit: number = 10): Promise<Transaction[]> {
-    return db.select().from(transactions)
-      .orderBy(desc(transactions.createdAt))
-      .limit(limit);
-  }
-
-  async getTodayTransactions(): Promise<Transaction[]> {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    
-    return db.select().from(transactions);
-  }
-
-  async getProducts(): Promise<Product[]> {
-    return db.select().from(products);
-  }
-
-  async getProductsByCategory(category: string): Promise<Product[]> {
-    return db.select().from(products)
-      .where(eq(products.category, category));
-  }
-
-  async getProduct(id: string): Promise<Product | undefined> {
-    const result = await db.select().from(products).where(eq(products.id, id)).limit(1);
-    return result[0];
-  }
-
-  async createProduct(product: InsertProduct): Promise<Product> {
-    const newProduct = {
-      ...product,
-    };
-    
-    await db.insert(products).values(newProduct);
-    return newProduct as Product;
-  }
-
-  async getTodayStats(): Promise<AdminStats | undefined> {
-    const today = new Date().toISOString().split('T')[0];
-    const result = await db.select().from(adminStats).where(eq(adminStats.date, today)).limit(1);
-    return result[0];
-  }
-
-  async updateTodayStats(stats: Partial<AdminStats>): Promise<AdminStats> {
-    const today = new Date().toISOString().split('T')[0];
-    const existing = await this.getTodayStats();
-    
-    if (existing) {
-      await db.update(adminStats)
-        .set(stats)
-        .where(eq(adminStats.date, today));
-      return { ...existing, ...stats };
-    } else {
-      const newStats = {
-        id: randomUUID(),
-        date: today,
-        totalTransactions: 0,
-        completedTransactions: 0,
-        pendingTransactions: 0,
-        failedTransactions: 0,
-        totalRevenue: 0,
-        ...stats
-      };
-      
-      await db.insert(adminStats).values(newStats);
-      return newStats as AdminStats;
-    }
-  }
 }
 
-export const storage = new DbStorage();
+// Database storage implementation removed for in-memory migration
+
+export const storage = new MemStorage();

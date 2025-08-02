@@ -60,6 +60,6 @@ export type InsertProduct = z.infer<typeof insertProductSchema>;
 export type AdminStats = typeof adminStats.$inferSelect;
 export type InsertAdminStats = z.infer<typeof insertAdminStatsSchema>;
 
-// Database connection
-const sqlQuery = neon(process.env.DATABASE_URL || "");
-export const db = drizzle(sqlQuery);
+// Database connection removed for in-memory storage migration
+// const sqlQuery = neon(process.env.DATABASE_URL || "");
+// export const db = drizzle(sqlQuery);

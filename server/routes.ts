@@ -653,38 +653,28 @@ Lanjutkan pembayaran?`;
         
         // Update status transaksi menjadi processing
         await storage.updateTransaction(transaction.id, {
-          status: "processing",
-          paidAt: new Date()
+          status: "processing"
         });
 
         // Proses transaksi ke Digiflazz
         try {
           let digiflazzResult;
           
-          if (transaction.digiflazzSku) {
-            // Gunakan SKU dari Digiflazz
+          // Cari produk di Digiflazz berdasarkan tipe produk
+          const skuCode = await digiflazzService.findProduct(
+            transaction.productType,
+            transaction.productName.toLowerCase(),
+            transaction.amount
+          );
+            
+          if (skuCode) {
             digiflazzResult = await digiflazzService.createTransaction(
-              transaction.digiflazzSku,
+              skuCode,
               transaction.targetNumber,
               transaction.id
             );
           } else {
-            // Cari produk di Digiflazz berdasarkan kategori
-            const skuCode = await digiflazzService.findProduct(
-              transaction.productCategory,
-              transaction.productName.toLowerCase(),
-              transaction.amount
-            );
-            
-            if (skuCode) {
-              digiflazzResult = await digiflazzService.createTransaction(
-                skuCode,
-                transaction.targetNumber,
-                transaction.id
-              );
-            } else {
-              throw new Error('Produk tidak ditemukan di Digiflazz');
-            }
+            throw new Error('Produk tidak ditemukan di Digiflazz');
           }
 
           if (digiflazzResult && digiflazzResult.data?.status === 'Sukses') {
@@ -693,9 +683,7 @@ Lanjutkan pembayaran?`;
             // Update transaksi sebagai completed
             await storage.updateTransaction(transaction.id, {
               status: "completed",
-              digiflazzRef: digiflazzResult.data.trx_id,
-              sn: digiflazzResult.data.sn || null,
-              completedAt: new Date()
+              digiflazzRef: digiflazzResult.data.ref_id || transaction.id
             });
 
             // Generate AI response untuk notifikasi
@@ -708,8 +696,8 @@ Lanjutkan pembayaran?`;
 
             // Update admin stats
             await storage.updateTodayStats({
-              completedTransactions: (await storage.getTodayStats())?.completedTransactions || 0 + 1,
-              revenue: (await storage.getTodayStats())?.revenue || 0 + transaction.totalAmount
+              totalTransactions: (await storage.getTodayStats())?.totalTransactions || 0 + 1,
+              totalRevenue: (await storage.getTodayStats())?.totalRevenue || 0 + transaction.totalAmount
             });
 
             console.log('🎉 Transaksi selesai:', transaction.id);
@@ -720,8 +708,7 @@ Lanjutkan pembayaran?`;
             
             // Update sebagai failed
             await storage.updateTransaction(transaction.id, {
-              status: "failed",
-              failureReason: digiflazzResult?.data?.message || 'Transaksi gagal di Digiflazz'
+              status: "failed"
             });
 
             // Update admin stats
@@ -735,8 +722,7 @@ Lanjutkan pembayaran?`;
           
           // Update sebagai failed
           await storage.updateTransaction(transaction.id, {
-            status: "failed",
-            failureReason: `Digiflazz error: ${digiflazzError.message}`
+            status: "failed"
           });
 
           // Update admin stats
@@ -750,8 +736,7 @@ Lanjutkan pembayaran?`;
         
         // Update status sebagai failed
         await storage.updateTransaction(transaction.id, {
-          status: "failed",
-          failureReason: `Payment ${status.toLowerCase()}`
+          status: "failed"
         });
 
         // Update admin stats
