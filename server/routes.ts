@@ -118,8 +118,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Command is required" });
       }
 
+      // Log the incoming command for debugging
+      console.log('Received command:', command);
+      
       // Parse the command using Gemini AI
       const parsedOrder = await parseOrderCommand(command);
+      console.log('Parsed order:', parsedOrder);
       
       // Check if this is a non-PPOB question
       if (parsedOrder.confidence === 0) {

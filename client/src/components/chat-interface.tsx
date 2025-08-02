@@ -85,6 +85,7 @@ export default function ChatInterface({ isOpen, onClose, onProductSelect }: Chat
       timestamp: new Date()
     };
 
+    console.log('Sending message:', input);
     setMessages(prev => [...prev, userMessage]);
     processChatMutation.mutate(input);
     setInput('');
@@ -116,8 +117,16 @@ export default function ChatInterface({ isOpen, onClose, onProductSelect }: Chat
 
       recognition.onresult = (event: any) => {
         const transcript = event.results[0][0].transcript;
+        console.log('Voice recognition result:', transcript);
         setInput(transcript);
         setIsListening(false);
+        
+        // Auto-send voice input after a short delay
+        setTimeout(() => {
+          if (transcript.trim()) {
+            handleSendMessage();
+          }
+        }, 500);
       };
 
       recognition.onerror = () => {
