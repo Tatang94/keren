@@ -44,8 +44,9 @@ export default function Home() {
                 Chat AI
               </Button>
               <Link href="/admin">
-                <Button variant="ghost" size="icon">
-                  <Settings className="h-5 w-5" />
+                <Button variant="outline" size="sm">
+                  <Settings className="mr-2 h-4 w-4" />
+                  Admin
                 </Button>
               </Link>
             </div>

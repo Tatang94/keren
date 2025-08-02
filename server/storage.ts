@@ -16,8 +16,14 @@ export interface IStorage {
   getProductsByCategory(category: string): Promise<Product[]>;
   getProduct(id: string): Promise<Product | undefined>;
   createProduct(product: InsertProduct): Promise<Product>;
+  updateProduct(id: string, updates: Partial<Product>): Promise<Product | undefined>;
+  deleteProduct(id: string): Promise<void>;
   clearAllProducts(): Promise<void>;
   getTransactionById(id: string): Promise<Transaction | undefined>;
+  
+  // Admin
+  deleteTransaction(id: string): Promise<void>;
+  getAllTransactions(): Promise<Transaction[]>;
   
   // Admin Stats
   getTodayStats(): Promise<AdminStats | undefined>;
@@ -284,6 +290,31 @@ export class MemStorage implements IStorage {
 
   async getTransactionById(id: string): Promise<Transaction | undefined> {
     return this.getTransaction(id);
+  }
+
+  async deleteTransaction(id: string): Promise<void> {
+    this.transactions.delete(id);
+  }
+
+  async getAllTransactions(): Promise<Transaction[]> {
+    return Array.from(this.transactions.values())
+      .sort((a, b) => new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime());
+  }
+
+  async updateProduct(id: string, updates: Partial<Product>): Promise<Product | undefined> {
+    const product = this.products.get(id);
+    if (!product) return undefined;
+
+    const updatedProduct: Product = {
+      ...product,
+      ...updates,
+    };
+    this.products.set(id, updatedProduct);
+    return updatedProduct;
+  }
+
+  async deleteProduct(id: string): Promise<void> {
+    this.products.delete(id);
   }
 }
 

@@ -775,6 +775,58 @@ Lanjutkan pembayaran?`;
     }
   });
 
+  // Admin: Delete transaction
+  app.delete("/api/admin/transactions/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      await storage.deleteTransaction(id);
+      res.json({ success: true, message: "Transaction deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete transaction" });
+    }
+  });
+
+  // Admin: Update transaction status
+  app.patch("/api/admin/transactions/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { status } = req.body;
+      
+      if (!status) {
+        return res.status(400).json({ error: "Status is required" });
+      }
+      
+      await storage.updateTransaction(id, { status });
+      res.json({ success: true, message: "Transaction status updated successfully" });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update transaction status" });
+    }
+  });
+
+  // Admin: Delete product
+  app.delete("/api/admin/products/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      await storage.deleteProduct(id);
+      res.json({ success: true, message: "Product deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete product" });
+    }
+  });
+
+  // Admin: Update product
+  app.patch("/api/admin/products/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const updateData = req.body;
+      
+      await storage.updateProduct(id, updateData);
+      res.json({ success: true, message: "Product updated successfully" });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update product" });
+    }
+  });
+
   // Admin: Get today's statistics
   app.get("/api/admin/stats", async (req, res) => {
     try {
