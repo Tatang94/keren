@@ -4,3 +4,8 @@ dist
 server/public
 vite.config.ts.*
 *.tar.gz
+
+# Environment files (tapi tidak .env.example dan API_KEYS_BACKUP.md)
+.env
+.env.local
+.env.production
