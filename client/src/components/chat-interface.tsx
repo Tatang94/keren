@@ -145,7 +145,7 @@ export default function ChatInterface({ isOpen, onClose, onProductSelect }: Chat
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col p-0">
+      <DialogContent className="max-w-4xl w-[90vw] max-h-[85vh] h-[85vh] flex flex-col p-0">
         <DialogHeader className="p-6 border-b border-gray-200">
           <div className="flex items-center">
             <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center">
@@ -161,14 +161,14 @@ export default function ChatInterface({ isOpen, onClose, onProductSelect }: Chat
           </div>
         </DialogHeader>
         
-        <ScrollArea className="flex-1 p-6">
-          <div className="space-y-4">
+        <div className="flex-1 p-6 overflow-y-auto chat-scroll">
+          <div className="space-y-6">
             {messages.map((message) => (
               <div key={message.id} className="flex">
-                <div className={`rounded-lg px-4 py-3 max-w-sm whitespace-pre-wrap ${
+                <div className={`rounded-lg px-6 py-4 max-w-2xl whitespace-pre-wrap ${
                   message.type === 'user' 
-                    ? 'chat-message-user ml-auto' 
-                    : 'chat-message-ai'
+                    ? 'chat-message-user ml-auto bg-primary text-white' 
+                    : 'chat-message-ai bg-gray-100 text-gray-900'
                 }`}>
                   <div className="flex items-start space-x-2">
                     {message.type === 'ai' && (
@@ -178,7 +178,7 @@ export default function ChatInterface({ isOpen, onClose, onProductSelect }: Chat
                       <User className="h-4 w-4 mt-0.5 flex-shrink-0" />
                     )}
                     <div className="flex-1">
-                      <p className="text-sm">{message.message}</p>
+                      <p className="text-base leading-relaxed">{message.message}</p>
                       {message.productData && (
                         <div className="mt-3 space-y-2">
                           <Button 
@@ -197,13 +197,14 @@ export default function ChatInterface({ isOpen, onClose, onProductSelect }: Chat
             ))}
             {processChatMutation.isPending && (
               <div className="flex">
-                <div className="chat-message-ai">
-                  <div className="flex items-center space-x-2">
-                    <Bot className="h-4 w-4" />
+                <div className="chat-message-ai rounded-lg px-6 py-4 max-w-2xl">
+                  <div className="flex items-center space-x-3">
+                    <Bot className="h-5 w-5 text-primary" />
+                    <span className="text-base text-gray-600">AI sedang memproses...</span>
                     <div className="flex space-x-1">
-                      <div className="w-2 h-2 bg-current rounded-full animate-bounce"></div>
-                      <div className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                      <div className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                      <div className="w-2 h-2 bg-primary rounded-full animate-bounce"></div>
+                      <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                      <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                     </div>
                   </div>
                 </div>
@@ -211,7 +212,7 @@ export default function ChatInterface({ isOpen, onClose, onProductSelect }: Chat
             )}
             <div ref={messagesEndRef} />
           </div>
-        </ScrollArea>
+        </div>
         
         <div className="p-6 border-t border-gray-200">
           <div className="flex items-center space-x-3">
