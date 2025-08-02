@@ -5,6 +5,7 @@ export interface IStorage {
   // Transactions
   getTransaction(id: string): Promise<Transaction | undefined>;
   getTransactionsByTargetNumber(targetNumber: string): Promise<Transaction[]>;
+  getTransactionByPaydisiniRef(ref: string): Promise<Transaction | null>;
   createTransaction(transaction: InsertTransaction): Promise<Transaction>;
   updateTransaction(id: string, updates: Partial<Transaction>): Promise<Transaction | undefined>;
   getRecentTransactions(limit?: number): Promise<Transaction[]>;
@@ -291,6 +292,11 @@ export class DbStorage implements IStorage {
     return db.select().from(transactions)
       .where(eq(transactions.targetNumber, targetNumber))
       .orderBy(desc(transactions.createdAt));
+  }
+
+  async getTransactionByPaydisiniRef(ref: string): Promise<Transaction | null> {
+    const result = await db.select().from(transactions).where(eq(transactions.paydisiniRef, ref)).limit(1);
+    return result[0] || null;
   }
 
   async createTransaction(transaction: InsertTransaction): Promise<Transaction> {

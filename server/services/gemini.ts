@@ -260,3 +260,50 @@ Berikan saran transaksi terbaik.`;
     return "Gagal memberikan saran transaksi. Silakan coba lagi.";
   }
 }
+
+// Generate completion notification message
+export async function generateCompletionNotification(
+  productName: string,
+  targetNumber: string,
+  totalAmount: number,
+  serialNumber?: string
+): Promise<string> {
+  const prompt = `
+Buat pesan notifikasi completion transaksi PPOB yang ramah dan informatif dalam bahasa Indonesia untuk:
+- Produk: ${productName}
+- Nomor tujuan: ${targetNumber}
+- Total pembayaran: Rp ${totalAmount.toLocaleString('id-ID')}
+- Serial Number/SN: ${serialNumber || 'Tidak tersedia'}
+
+Format pesan harus:
+1. Menggunakan emoji yang sesuai (✅ untuk sukses, 📱 untuk produk, dll)
+2. Mengucapkan selamat/terima kasih
+3. Menyebutkan detail transaksi
+4. Jika ada SN, tampilkan dengan jelas
+5. Ramah dan profesional dalam bahasa Indonesia
+6. Maksimal 200 kata
+
+Contoh format yang diinginkan:
+"✅ **TRANSAKSI BERHASIL!**
+
+Selamat! Pembelian Anda telah berhasil diproses.
+📱 **Produk:** [nama produk]
+🎯 **Tujuan:** [nomor]
+💰 **Total:** Rp [jumlah]
+📋 **SN:** [serial number jika ada]
+
+Terima kasih telah menggunakan layanan kami!"
+`;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-pro",
+      contents: prompt,
+    });
+    
+    return response.text || `✅ **TRANSAKSI BERHASIL!**\n\nPembelian ${productName} untuk ${targetNumber} sebesar Rp ${totalAmount.toLocaleString('id-ID')} telah berhasil diproses.\n\n${serialNumber ? `📋 **SN:** ${serialNumber}\n\n` : ''}Terima kasih telah menggunakan layanan kami!`;
+  } catch (error) {
+    console.error('Error generating completion notification:', error);
+    return `✅ **TRANSAKSI BERHASIL!**\n\nPembelian ${productName} untuk ${targetNumber} sebesar Rp ${totalAmount.toLocaleString('id-ID')} telah berhasil diproses.\n\n${serialNumber ? `📋 **SN:** ${serialNumber}\n\n` : ''}Terima kasih telah menggunakan layanan kami!`;
+  }
+}

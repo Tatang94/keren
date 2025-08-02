@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { parseOrderCommand, generateOrderConfirmation, generateErrorMessage, analyzeDigiflazzProducts, generateTransactionAdvice } from "./services/gemini";
+import { parseOrderCommand, generateOrderConfirmation, generateErrorMessage, analyzeDigiflazzProducts, generateTransactionAdvice, generateCompletionNotification } from "./services/gemini";
 import { digiflazzService } from "./services/digiflazz";
 import { paydisiniService } from "./services/paydisini";
 import { insertTransactionSchema } from "@shared/schema";
@@ -161,6 +161,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         errorCount: 0,
         totalProducts: realProducts.length
       });
+      }
     } catch (error) {
       console.error('Sync error:', error);
       res.status(500).json({ error: "Failed to sync products" });
@@ -496,7 +497,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
               price: parsedOrder.amount,
               adminFee: calculateAdminFee(parsedOrder.amount),
               category: parsedOrder.productType,
-              provider: parsedOrder.provider
+              provider: parsedOrder.provider,
+              isActive: true
             };
             console.log('✅ Produk ditemukan di Digiflazz:', selectedProduct.name);
           }
@@ -554,7 +556,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create transaction and payment
   app.post("/api/transactions", async (req, res) => {
     try {
-      const validatedData = insertTransactionSchema.parse(req.body);
+      // Add required productType field
+      const transactionData = {
+        ...req.body,
+        productType: req.body.productCategory || req.body.productType || 'pulsa'
+      };
+      
+      const validatedData = insertTransactionSchema.parse(transactionData);
       
       // Create transaction
       const transaction = await storage.createTransaction(validatedData);
@@ -608,6 +616,147 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(transaction);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch transaction" });
+    }
+  });
+
+  // Webhook handler for Paydisini payment notifications
+  app.post("/api/webhook/paydisini", async (req, res) => {
+    try {
+      console.log('🔔 Webhook Paydisini diterima:', req.body);
+      
+      const { unique_code, status, amount } = req.body;
+      
+      if (!unique_code) {
+        return res.status(400).json({ error: "Missing unique_code" });
+      }
+
+      // Cari transaksi berdasarkan paydisini reference
+      const transaction = await storage.getTransactionByPaydisiniRef(unique_code);
+      
+      if (!transaction) {
+        console.log(`⚠️ Transaksi dengan unique_code ${unique_code} tidak ditemukan`);
+        return res.status(404).json({ error: "Transaction not found" });
+      }
+
+      console.log(`📦 Transaksi ditemukan: ${transaction.id}, status: ${status}`);
+
+      if (status === "Success" || status === "success") {
+        console.log('✅ Pembayaran berhasil, memproses ke Digiflazz...');
+        
+        // Update status transaksi menjadi processing
+        await storage.updateTransaction(transaction.id, {
+          status: "processing",
+          paidAt: new Date()
+        });
+
+        // Proses transaksi ke Digiflazz
+        try {
+          let digiflazzResult;
+          
+          if (transaction.digiflazzSku) {
+            // Gunakan SKU dari Digiflazz
+            digiflazzResult = await digiflazzService.createTransaction(
+              transaction.digiflazzSku,
+              transaction.targetNumber,
+              transaction.id
+            );
+          } else {
+            // Cari produk di Digiflazz berdasarkan kategori
+            const skuCode = await digiflazzService.findProduct(
+              transaction.productCategory,
+              transaction.productName.toLowerCase(),
+              transaction.amount
+            );
+            
+            if (skuCode) {
+              digiflazzResult = await digiflazzService.createTransaction(
+                skuCode,
+                transaction.targetNumber,
+                transaction.id
+              );
+            } else {
+              throw new Error('Produk tidak ditemukan di Digiflazz');
+            }
+          }
+
+          if (digiflazzResult && digiflazzResult.data?.status === 'Sukses') {
+            console.log('✅ Transaksi Digiflazz berhasil');
+            
+            // Update transaksi sebagai completed
+            await storage.updateTransaction(transaction.id, {
+              status: "completed",
+              digiflazzRef: digiflazzResult.data.trx_id,
+              sn: digiflazzResult.data.sn || null,
+              completedAt: new Date()
+            });
+
+            // Generate AI response untuk notifikasi
+            const notificationMsg = await generateCompletionNotification(
+              transaction.productName,
+              transaction.targetNumber,
+              transaction.totalAmount,
+              digiflazzResult.data.sn
+            );
+
+            // Update admin stats
+            await storage.updateTodayStats({
+              completedTransactions: (await storage.getTodayStats())?.completedTransactions || 0 + 1,
+              revenue: (await storage.getTodayStats())?.revenue || 0 + transaction.totalAmount
+            });
+
+            console.log('🎉 Transaksi selesai:', transaction.id);
+            console.log('📝 Notifikasi:', notificationMsg);
+
+          } else {
+            console.log('❌ Transaksi Digiflazz gagal:', digiflazzResult);
+            
+            // Update sebagai failed
+            await storage.updateTransaction(transaction.id, {
+              status: "failed",
+              failureReason: digiflazzResult?.data?.message || 'Transaksi gagal di Digiflazz'
+            });
+
+            // Update admin stats
+            await storage.updateTodayStats({
+              failedTransactions: (await storage.getTodayStats())?.failedTransactions || 0 + 1
+            });
+          }
+
+        } catch (digiflazzError) {
+          console.error('❌ Error processing Digiflazz transaction:', digiflazzError);
+          
+          // Update sebagai failed
+          await storage.updateTransaction(transaction.id, {
+            status: "failed",
+            failureReason: `Digiflazz error: ${digiflazzError.message}`
+          });
+
+          // Update admin stats
+          await storage.updateTodayStats({
+            failedTransactions: (await storage.getTodayStats())?.failedTransactions || 0 + 1
+          });
+        }
+
+      } else if (status === "Canceled" || status === "Expired") {
+        console.log('❌ Pembayaran dibatalkan/expired');
+        
+        // Update status sebagai failed
+        await storage.updateTransaction(transaction.id, {
+          status: "failed",
+          failureReason: `Payment ${status.toLowerCase()}`
+        });
+
+        // Update admin stats
+        await storage.updateTodayStats({
+          failedTransactions: (await storage.getTodayStats())?.failedTransactions || 0 + 1
+        });
+      }
+
+      res.json({ success: true, message: "Webhook processed" });
+
+    } catch (error) {
+      console.error('❌ Webhook processing error:', error);
+      res.status(500).json({ error: "Webhook processing failed" });
     }
   });
 
