@@ -193,12 +193,12 @@ export default function ChatInterface({ isOpen, onClose, onProductSelect }: Chat
           <div className="mb-4">
             <p className="text-sm font-medium text-gray-700 mb-3">🚀 Perintah Cepat:</p>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 mb-4">
-              {/* Pulsa Actions */}
+              {/* Kategori Pulsa */}
               <Button
                 size="sm"
                 variant="outline"
                 className="text-xs h-8 justify-start"
-                onClick={() => handleQuickAction("Cek harga pulsa Telkomsel")}
+                onClick={() => handleQuickAction("List pulsa Telkomsel")}
                 disabled={processChatMutation.isPending}
               >
                 📱 Pulsa Telkomsel
@@ -207,7 +207,7 @@ export default function ChatInterface({ isOpen, onClose, onProductSelect }: Chat
                 size="sm"
                 variant="outline"
                 className="text-xs h-8 justify-start"
-                onClick={() => handleQuickAction("Cek harga pulsa Indosat")}
+                onClick={() => handleQuickAction("List pulsa Indosat")}
                 disabled={processChatMutation.isPending}
               >
                 📱 Pulsa Indosat
@@ -216,7 +216,7 @@ export default function ChatInterface({ isOpen, onClose, onProductSelect }: Chat
                 size="sm"
                 variant="outline"
                 className="text-xs h-8 justify-start"
-                onClick={() => handleQuickAction("Cek harga pulsa XL")}
+                onClick={() => handleQuickAction("List pulsa XL")}
                 disabled={processChatMutation.isPending}
               >
                 📱 Pulsa XL
@@ -225,86 +225,90 @@ export default function ChatInterface({ isOpen, onClose, onProductSelect }: Chat
                 size="sm"
                 variant="outline"
                 className="text-xs h-8 justify-start"
-                onClick={() => handleQuickAction("Cek harga pulsa Tri")}
+                onClick={() => handleQuickAction("List pulsa Tri")}
                 disabled={processChatMutation.isPending}
               >
                 📱 Pulsa Tri
               </Button>
               
-              {/* Popular Product Actions */}
+              {/* Kategori Data */}
               <Button
                 size="sm"
                 variant="outline"
                 className="text-xs h-8 justify-start"
-                onClick={() => handleQuickAction("Beli pulsa Telkomsel 10rb")}
+                onClick={() => handleQuickAction("List data Telkomsel")}
                 disabled={processChatMutation.isPending}
               >
-                💰 Tsel 10rb
+                📶 Data Telkomsel
               </Button>
               <Button
                 size="sm"
                 variant="outline"
                 className="text-xs h-8 justify-start"
-                onClick={() => handleQuickAction("Beli pulsa Telkomsel 25rb")}
+                onClick={() => handleQuickAction("List data Indosat")}
                 disabled={processChatMutation.isPending}
               >
-                💰 Tsel 25rb
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                className="text-xs h-8 justify-start"
-                onClick={() => handleQuickAction("Beli pulsa Tri 5rb")}
-                disabled={processChatMutation.isPending}
-              >
-                💰 Tri 5rb
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                className="text-xs h-8 justify-start"
-                onClick={() => handleQuickAction("Token PLN 20rb")}
-                disabled={processChatMutation.isPending}
-              >
-                ⚡ PLN 20rb
+                📶 Data Indosat
               </Button>
               
-              {/* Game Voucher & E-wallet */}
+              {/* Kategori Games & Voucher */}
               <Button
                 size="sm"
                 variant="outline"
                 className="text-xs h-8 justify-start"
-                onClick={() => handleQuickAction("List game voucher")}
+                onClick={() => handleQuickAction("List games")}
                 disabled={processChatMutation.isPending}
               >
-                🎮 Game Voucher
+                🎮 Games
               </Button>
               <Button
                 size="sm"
                 variant="outline"
                 className="text-xs h-8 justify-start"
-                onClick={() => handleQuickAction("List produk ewallet")}
+                onClick={() => handleQuickAction("List voucher")}
                 disabled={processChatMutation.isPending}
               >
-                💳 E-wallet
+                🎫 Voucher
+              </Button>
+              
+              {/* Kategori E-Money & PLN */}
+              <Button
+                size="sm"
+                variant="outline"
+                className="text-xs h-8 justify-start"
+                onClick={() => handleQuickAction("List E-Money")}
+                disabled={processChatMutation.isPending}
+              >
+                💳 E-Money
               </Button>
               <Button
                 size="sm"
                 variant="outline"
                 className="text-xs h-8 justify-start"
-                onClick={() => handleQuickAction("List token listrik")}
+                onClick={() => handleQuickAction("List PLN")}
                 disabled={processChatMutation.isPending}
               >
-                ⚡ Token Listrik
+                ⚡ PLN
+              </Button>
+              
+              {/* Paket SMS & Telpon + Streaming */}
+              <Button
+                size="sm"
+                variant="outline"
+                className="text-xs h-8 justify-start"
+                onClick={() => handleQuickAction("List Paket SMS & Telpon")}
+                disabled={processChatMutation.isPending}
+              >
+                📞 SMS & Telpon
               </Button>
               <Button
                 size="sm"
                 variant="outline"
                 className="text-xs h-8 justify-start"
-                onClick={() => handleQuickAction("List semua kategori")}
+                onClick={() => handleQuickAction("List Streaming")}
                 disabled={processChatMutation.isPending}
               >
-                📋 Semua Produk
+                📺 Streaming
               </Button>
             </div>
           </div>
