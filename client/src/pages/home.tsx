@@ -96,11 +96,11 @@ export default function Home() {
                 <Button 
                   onClick={() => scrollToSection('produk')}
                   variant="outline" 
-                  className="border-white text-white hover:bg-white hover:text-primary"
+                  className="border-2 border-white text-white hover:bg-white hover:text-primary font-semibold"
                   size="lg"
                 >
                   <ShoppingCart className="mr-2 h-5 w-5" />
-                  Lihat Produk
+                  <span className="text-white hover:text-primary">Lihat Produk</span>
                 </Button>
               </div>
             </div>
