@@ -78,6 +78,12 @@ export class MemStorage implements IStorage {
       const { digiflazzService } = await import("./services/digiflazz");
       const digiflazzProducts = await digiflazzService.getProducts();
       
+      // Check if digiflazzProducts is an array
+      if (!Array.isArray(digiflazzProducts)) {
+        console.log('Digiflazz API returned no products, using default products only');
+        return;
+      }
+      
       // Convert Digiflazz products to our format
       digiflazzProducts.forEach(dfProduct => {
         if (dfProduct.status === 'available') {
