@@ -42,20 +42,26 @@ export class DigiflazzService {
     this.apiKey = process.env.DIGIFLAZZ_API_KEY || "";
   }
 
-  private async generateSign(refId: string, customerNo: string, buyerSkuCode: string): Promise<string> {
+  private async generateSign(refId: string, customerNo?: string, buyerSkuCode?: string): Promise<string> {
     const crypto = await import('crypto');
+    // Sesuai dokumentasi Digiflazz: sign = md5(username + apikey + refId)
     const data = this.username + this.apiKey + refId;
     return crypto.createHash('md5').update(data).digest('hex');
   }
 
   async getProducts(): Promise<DigiflazzProduct[]> {
     try {
-      const sign = await this.generateSign("pricelist", "", "");
+      // Sesuai dokumentasi Digiflazz API
+      const refId = "pricelist" + Date.now(); // Ref ID unik
+      const sign = await this.generateSign(refId);
+      
       const payload = {
-        cmd: "prepaid",
+        cmd: "prepaid", // Command untuk produk prepaid
         username: this.username,
         sign: sign
       };
+
+      console.log('Requesting Digiflazz products with payload:', payload);
 
       const response = await fetch(`${this.baseUrl}/price-list`, {
         method: 'POST',
@@ -66,62 +72,93 @@ export class DigiflazzService {
       });
 
       if (!response.ok) {
-        throw new Error(`Digiflazz API error: ${response.statusText}`);
+        throw new Error(`Digiflazz API error: ${response.status} ${response.statusText}`);
       }
 
       const data = await response.json();
       
-
+      console.log('Digiflazz API Response status:', data);
       
-      console.log('Digiflazz API Response sample:', JSON.stringify(data, null, 2).substring(0, 500));
-      
-      // Check if data structure is correct
+      // Periksa struktur response sesuai dokumentasi
       if (data.data && Array.isArray(data.data)) {
-        console.log(`Digiflazz returned ${data.data.length} products`);
+        console.log(`✅ Digiflazz berhasil mengembalikan ${data.data.length} produk`);
+        
+        // Log sample produk untuk debug
         if (data.data.length > 0) {
-          console.log('First product structure:', JSON.stringify(data.data[0], null, 2));
+          console.log('📦 Contoh produk:', JSON.stringify(data.data[0], null, 2));
         }
-        return data.data;
+        
+        // Filter produk yang aktif saja
+        const activeProducts = data.data.filter((product: DigiflazzProduct) => 
+          product.status === 'available' || product.status === 'normal'
+        );
+        
+        console.log(`📊 Produk aktif: ${activeProducts.length}/${data.data.length}`);
+        return activeProducts;
       } else {
-        console.log('Invalid Digiflazz response structure:', data);
+        console.log('❌ Response tidak sesuai format:', data);
         return [];
       }
     } catch (error) {
-      console.error('Error fetching Digiflazz products:', error);
+      console.error('❌ Error mengambil produk Digiflazz:', error);
       return [];
     }
   }
 
   async findProduct(productType: string, provider: string, amount: number): Promise<string | null> {
     try {
-      // Map internal product types to Digiflazz categories (sesuai API)
-      const categoryMap: Record<string, string> = {
-        'pulsa': 'Pulsa',
-        'token_listrik': 'PLN',
-        'game_voucher': 'Games',
-        'ewallet': 'E-Money',
-        'tv_streaming': 'TV'
+      // Ambil semua produk dari Digiflazz
+      const products = await this.getProducts();
+      
+      // Map kategori internal ke kategori Digiflazz
+      const categoryMap: Record<string, string[]> = {
+        'pulsa': ['Pulsa', 'Paket Data'],
+        'token_listrik': ['PLN', 'Token Listrik'],
+        'game_voucher': ['Games', 'Voucher Game'],
+        'ewallet': ['E-Money', 'E-Wallet'],
+        'tv_streaming': ['TV', 'Streaming']
       };
 
-      const category = categoryMap[productType];
-      if (!category) return null;
+      const allowedCategories = categoryMap[productType];
+      if (!allowedCategories) {
+        console.log(`❌ Kategori produk tidak dikenali: ${productType}`);
+        return null;
+      }
 
-      // For demonstration, return a mock SKU code based on the product
-      // In real implementation, this would query Digiflazz API
-      const skuMapping: Record<string, Record<string, string>> = {
-        'pulsa': {
-          'telkomsel': `tsel${amount/1000}`,
-          'indosat': `isat${amount/1000}`,
-          'xl': `xl${amount/1000}`
-        },
-        'token_listrik': {
-          'pln': `pln${amount/1000}`
-        }
-      };
+      // Filter produk berdasarkan kategori, brand, dan nominal
+      const matchingProducts = products.filter(product => {
+        const categoryMatch = allowedCategories.some(cat => 
+          product.category.toLowerCase().includes(cat.toLowerCase())
+        );
+        const brandMatch = product.brand.toLowerCase().includes(provider.toLowerCase());
+        
+        // Untuk pulsa dan token listrik, cocokkan nominal dari nama produk
+        const nameMatch = product.product_name.toLowerCase().includes(amount.toString()) ||
+                         product.product_name.toLowerCase().includes((amount/1000).toString() + 'k') ||
+                         product.product_name.toLowerCase().includes((amount/1000).toString() + '.000');
+        
+        return categoryMatch && brandMatch && nameMatch;
+      });
 
-      return skuMapping[productType]?.[provider] || null;
+      if (matchingProducts.length > 0) {
+        console.log(`✅ Ditemukan ${matchingProducts.length} produk matching:`, 
+          matchingProducts.map(p => p.product_name).join(', '));
+        
+        // Pilih produk dengan harga paling dekat
+        const closestProduct = matchingProducts.reduce((prev, curr) => {
+          const prevDiff = Math.abs(prev.price - amount);
+          const currDiff = Math.abs(curr.price - amount);
+          return currDiff < prevDiff ? curr : prev;
+        });
+        
+        console.log(`🎯 Produk terpilih: ${closestProduct.product_name} (${closestProduct.buyer_sku_code})`);
+        return closestProduct.buyer_sku_code;
+      }
+
+      console.log(`❌ Tidak ditemukan produk: ${productType} ${provider} ${amount}`);
+      return null;
     } catch (error) {
-      console.error('Error finding Digiflazz product:', error);
+      console.error('❌ Error mencari produk Digiflazz:', error);
       return null;
     }
   }
@@ -132,10 +169,11 @@ export class DigiflazzService {
     refId: string
   ): Promise<DigiflazzTransactionResponse> {
     try {
-      const sign = await this.generateSign(refId, customerNo, buyerSkuCode);
+      // Sesuai dokumentasi: sign = md5(username + apikey + refId)
+      const sign = await this.generateSign(refId);
       
       const payload: DigiflazzTransactionRequest = {
-        commands: "inq-pasca",
+        commands: "inq-pasca", // Command untuk inquiry transaksi
         username: this.username,
         buyer_sku_code: buyerSkuCode,
         customer_no: customerNo,
@@ -143,6 +181,12 @@ export class DigiflazzService {
         sign: sign
       };
 
+      console.log('🔄 Membuat transaksi Digiflazz:', {
+        sku: buyerSkuCode,
+        customer: customerNo,
+        ref: refId
+      });
+
       const response = await fetch(`${this.baseUrl}/transaction`, {
         method: 'POST',
         headers: {
@@ -152,26 +196,33 @@ export class DigiflazzService {
       });
 
       if (!response.ok) {
-        throw new Error(`Digiflazz transaction error: ${response.statusText}`);
+        throw new Error(`Digiflazz transaction error: ${response.status} ${response.statusText}`);
       }
 
-      return await response.json();
+      const result = await response.json();
+      
+      console.log('✅ Response transaksi Digiflazz:', result);
+      
+      return result;
     } catch (error) {
-      console.error('Error creating Digiflazz transaction:', error);
+      console.error('❌ Error membuat transaksi Digiflazz:', error);
       throw error;
     }
   }
 
   async checkTransactionStatus(refId: string): Promise<DigiflazzTransactionResponse> {
     try {
-      const sign = await this.generateSign(refId, "", "");
+      // Sesuai dokumentasi: sign = md5(username + apikey + refId)
+      const sign = await this.generateSign(refId);
       
       const payload = {
-        commands: "status-pasca",
+        commands: "status-pasca", // Command untuk cek status
         username: this.username,
         ref_id: refId,
         sign: sign
       };
+
+      console.log('🔍 Mengecek status transaksi:', refId);
 
       const response = await fetch(`${this.baseUrl}/transaction`, {
         method: 'POST',
@@ -182,12 +233,16 @@ export class DigiflazzService {
       });
 
       if (!response.ok) {
-        throw new Error(`Digiflazz status check error: ${response.statusText}`);
+        throw new Error(`Digiflazz status check error: ${response.status} ${response.statusText}`);
       }
 
-      return await response.json();
+      const result = await response.json();
+      
+      console.log('📊 Status transaksi Digiflazz:', result);
+      
+      return result;
     } catch (error) {
-      console.error('Error checking Digiflazz transaction status:', error);
+      console.error('❌ Error mengecek status Digiflazz:', error);
       throw error;
     }
   }

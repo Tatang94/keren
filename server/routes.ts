@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { parseOrderCommand, generateOrderConfirmation, generateErrorMessage } from "./services/gemini";
+import { parseOrderCommand, generateOrderConfirmation, generateErrorMessage, analyzeDigiflazzProducts, generateTransactionAdvice } from "./services/gemini";
 import { digiflazzService } from "./services/digiflazz";
 import { paydisiniService } from "./services/paydisini";
 import { insertTransactionSchema } from "@shared/schema";
@@ -21,14 +21,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Sync products from Digiflazz
   app.post("/api/admin/sync-products", async (req, res) => {
     try {
-      // For now, use fallback products since Digiflazz returns test data
-      console.log('Using fallback products due to test data from Digiflazz API');
+      console.log('🔄 Memulai sinkronisasi produk dari Digiflazz...');
       
       let syncedCount = 0;
+      let errorCount = 0;
       
       // Clear existing products first
       await storage.clearAllProducts();
-      console.log('Cleared existing products');
+      console.log('🗑️ Database produk dibersihkan');
+
+      // Ambil produk real dari Digiflazz API
+      const digiflazzProducts = await digiflazzService.getProducts();
+      
+      if (digiflazzProducts.length > 0) {
+        console.log(`📦 Digiflazz mengembalikan ${digiflazzProducts.length} produk`);
+        
+        // Sync produk Digiflazz yang valid
+        for (const dfProduct of digiflazzProducts) {
+          try {
+            const product = {
+              id: dfProduct.buyer_sku_code,
+              category: mapDigiflazzCategory(dfProduct.category),
+              provider: mapDigiflazzBrand(dfProduct.brand),
+              name: dfProduct.product_name,
+              price: dfProduct.price,
+              adminFee: calculateAdminFee(dfProduct.price),
+              isActive: dfProduct.status === 'available' || dfProduct.status === 'normal'
+            };
+            
+            await storage.createProduct(product);
+            syncedCount++;
+          } catch (error) {
+            console.error(`❌ Error syncing product ${dfProduct.buyer_sku_code}:`, error);
+            errorCount++;
+          }
+        }
+        
+        console.log(`✅ Sync Digiflazz selesai: ${syncedCount} produk berhasil, ${errorCount} error`);
+        
+        return res.json({ 
+          success: true, 
+          message: `Berhasil sync ${syncedCount} produk dari Digiflazz API`,
+          syncedCount,
+          errorCount,
+          totalProducts: digiflazzProducts.length,
+          source: 'digiflazz_api'
+        });
+      } else {
+        console.log('⚠️ Digiflazz API tidak mengembalikan produk, menggunakan fallback data');
+        // Fallback ke produk manual jika Digiflazz API gagal
       
       // Use real Indonesian telecom products
       const realProducts = [
@@ -244,52 +285,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Handler functions for different intents
   async function handleCheckPrice(parsedOrder: any, res: any) {
     try {
-      let products = await storage.getProductsByCategory(parsedOrder.productType);
+      // Dapatkan produk dari database lokal dan Digiflazz API
+      console.log('🔍 Mengecek harga untuk:', parsedOrder);
       
+      let localProducts = await storage.getProductsByCategory(parsedOrder.productType);
+      
+      // Juga ambil produk real-time dari Digiflazz API
+      let digiflazzProducts: any[] = [];
+      try {
+        digiflazzProducts = await digiflazzService.getProducts();
+        console.log(`📦 Digiflazz mengembalikan ${digiflazzProducts.length} produk`);
+      } catch (error) {
+        console.log('⚠️ Gagal mengambil produk Digiflazz, menggunakan data lokal');
+      }
+
+      // Filter produk berdasarkan provider jika diminta
       if (parsedOrder.provider) {
-        products = products.filter(p => 
+        localProducts = localProducts.filter(p => 
           p.provider.toLowerCase().includes(parsedOrder.provider.toLowerCase())
+        );
+        
+        digiflazzProducts = digiflazzProducts.filter((p: any) => 
+          p.brand && p.brand.toLowerCase().includes(parsedOrder.provider.toLowerCase())
         );
       }
 
-      if (products.length === 0) {
+      // Gabungkan dan pilih produk terbaik
+      const allProducts = [...localProducts, ...digiflazzProducts];
+      
+      if (allProducts.length === 0) {
         return res.json({
           success: false,
-          message: `Produk ${parsedOrder.productType} ${parsedOrder.provider || ''} tidak ditemukan.`
+          message: `❌ Produk ${parsedOrder.productType} ${parsedOrder.provider || ''} tidak ditemukan.\n\n💡 Coba gunakan provider lain seperti: Telkomsel, Indosat, XL, Tri`
         });
       }
 
-      // Group products by price
-      const priceGroups = products.reduce((acc: any, product: any) => {
-        if (!acc[product.price]) {
-          acc[product.price] = [];
-        }
-        acc[product.price].push(product);
-        return acc;
-      }, {});
-
-      let message = `📋 **Daftar Harga ${parsedOrder.productType.toUpperCase()} ${parsedOrder.provider?.toUpperCase() || ''}:**\n\n`;
-      
-      Object.keys(priceGroups)
-        .sort((a, b) => parseInt(a) - parseInt(b))
-        .slice(0, 10) // Limit to 10 items
-        .forEach(price => {
-          const product = priceGroups[price][0];
-          const totalPrice = product.price + product.adminFee;
-          message += `💰 **Rp ${parseInt(price).toLocaleString('id-ID')}** (+ admin Rp ${product.adminFee.toLocaleString('id-ID')} = **Rp ${totalPrice.toLocaleString('id-ID')}**)\n`;
-          message += `   ${product.name}\n\n`;
-        });
-
-      message += `\n💡 Untuk membeli: "Beli ${parsedOrder.productType} ${parsedOrder.provider || '[provider]'} [nominal] untuk [nomor]"`;
+      // Gunakan AI untuk menganalisis dan memberikan rekomendasi
+      const userQuery = `cek harga ${parsedOrder.productType} ${parsedOrder.provider || ''}`;
+      const aiResponse = await analyzeDigiflazzProducts(allProducts, userQuery);
 
       return res.json({
         success: true,
-        message
+        message: aiResponse
       });
     } catch (error) {
+      console.error('❌ Error handleCheckPrice:', error);
       return res.json({
         success: false,
-        message: "Gagal mengambil data harga produk."
+        message: "Gagal mengambil data harga produk. Silakan coba lagi."
       });
     }
   }
@@ -392,7 +435,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                      `📱 **Produk:** ${transaction.productName}\n` +
                      `🎯 **Tujuan:** ${transaction.targetNumber}\n` +
                      `💰 **Total:** Rp ${transaction.totalAmount.toLocaleString('id-ID')}\n` +
-                     `📅 **Waktu:** ${transaction.createdAt.toLocaleString('id-ID')}\n\n` +
+                     `📅 **Waktu:** ${transaction.createdAt?.toLocaleString('id-ID') || 'Tidak diketahui'}\n\n` +
                      (transaction.status === "pending" ? "⏳ Transaksi sedang diproses..." : "");
 
       return res.json({
@@ -416,7 +459,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Find matching products
+      console.log('🛒 Memproses pembelian:', parsedOrder);
+
+      // Cari produk di database lokal terlebih dahulu
       let products = await storage.getProductsByCategory(parsedOrder.productType);
       
       if (parsedOrder.provider) {
@@ -429,41 +474,79 @@ export async function registerRoutes(app: Express): Promise<Server> {
         products = products.filter(p => p.price === parsedOrder.amount);
       }
 
-      if (products.length === 0) {
-        const errorMsg = await generateErrorMessage("Produk tidak ditemukan");
+      // Jika tidak ditemukan di database lokal, cari di Digiflazz
+      let selectedProduct = products[0];
+      let digiflazzSkuCode: string | null = null;
+
+      if (!selectedProduct && parsedOrder.provider && parsedOrder.amount) {
+        console.log('🔍 Mencari produk di Digiflazz API...');
+        
+        try {
+          digiflazzSkuCode = await digiflazzService.findProduct(
+            parsedOrder.productType,
+            parsedOrder.provider,
+            parsedOrder.amount
+          );
+          
+          if (digiflazzSkuCode) {
+            // Buat produk temporary dari Digiflazz
+            selectedProduct = {
+              id: digiflazzSkuCode,
+              name: `${parsedOrder.provider.toUpperCase()} ${parsedOrder.amount.toLocaleString('id-ID')}`,
+              price: parsedOrder.amount,
+              adminFee: calculateAdminFee(parsedOrder.amount),
+              category: parsedOrder.productType,
+              provider: parsedOrder.provider
+            };
+            console.log('✅ Produk ditemukan di Digiflazz:', selectedProduct.name);
+          }
+        } catch (error) {
+          console.log('⚠️ Error mencari produk Digiflazz:', error);
+        }
+      }
+
+      if (!selectedProduct) {
+        // Gunakan AI untuk memberikan saran alternatif
+        const availableProducts = await storage.getProductsByCategory(parsedOrder.productType);
+        const adviceMsg = await generateTransactionAdvice(
+          parsedOrder.productType,
+          parsedOrder.provider || '',
+          parsedOrder.amount || 0,
+          availableProducts
+        );
+        
         return res.json({
           success: false,
-          message: errorMsg
+          message: `❌ **Produk tidak ditemukan**\n\n${adviceMsg}`
         });
       }
 
-      // Use the first matching product
-      const product = products[0];
-      
-      // Generate confirmation message
+      // Generate confirmation dengan AI
       const confirmationMsg = await generateOrderConfirmation(
-        product.name,
+        selectedProduct.name,
         parsedOrder.targetNumber,
-        product.price,
-        product.adminFee
+        selectedProduct.price,
+        selectedProduct.adminFee
       );
 
       return res.json({
         success: true,
         message: confirmationMsg,
         productData: {
-          productId: product.id,
-          productName: product.name,
+          productId: selectedProduct.id,
+          productName: selectedProduct.name,
           targetNumber: parsedOrder.targetNumber,
-          amount: product.price,
-          adminFee: product.adminFee,
-          totalAmount: product.price + product.adminFee
+          amount: selectedProduct.price,
+          adminFee: selectedProduct.adminFee,
+          totalAmount: selectedProduct.price + selectedProduct.adminFee,
+          digiflazzSku: digiflazzSkuCode
         }
       });
     } catch (error) {
+      console.error('❌ Error handleBuyProduct:', error);
       return res.json({
         success: false,
-        message: "Gagal memproses permintaan pembelian."
+        message: "Gagal memproses permintaan pembelian. Silakan coba lagi."
       });
     }
   }
