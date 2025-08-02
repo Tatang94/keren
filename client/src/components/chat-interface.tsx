@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Bot, User, Send } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -27,11 +28,13 @@ export default function ChatInterface({ isOpen, onClose, onProductSelect }: Chat
     {
       id: '1',
       type: 'ai',
-      message: 'Halo! Saya siap membantu pembelian pulsa, token listrik, dan voucher game.\n\nContoh perintah:\n• Beli pulsa Telkomsel 50rb untuk 081234567890\n• Token PLN 100rb meter 12345678901\n• Cek harga pulsa Indosat\n\nKetik perintah Anda:',
+      message: 'Halo! Saya siap membantu pembelian pulsa, token listrik, dan voucher game.\n\nPilih jenis produk dari dropdown di bawah, kemudian masukkan nomor tujuan untuk melanjutkan transaksi.',
       timestamp: new Date()
     }
   ]);
   const [input, setInput] = useState('');
+  const [selectedCommand, setSelectedCommand] = useState('');
+  const [customNumber, setCustomNumber] = useState('');
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
@@ -115,6 +118,30 @@ export default function ChatInterface({ isOpen, onClose, onProductSelect }: Chat
     processChatMutation.mutate(command);
   };
 
+  const handleDropdownCommand = () => {
+    if (!selectedCommand || !customNumber.trim()) {
+      toast({
+        title: "Lengkapi Data",
+        description: "Pilih jenis produk dan masukkan nomor tujuan",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const fullCommand = `${selectedCommand} untuk ${customNumber}`;
+    const userMessage: ChatMessage = {
+      id: Date.now().toString(),
+      type: 'user',
+      message: fullCommand,
+      timestamp: new Date()
+    };
+
+    setMessages(prev => [...prev, userMessage]);
+    processChatMutation.mutate(fullCommand);
+    setSelectedCommand('');
+    setCustomNumber('');
+  };
+
 
 
   return (
@@ -189,147 +216,109 @@ export default function ChatInterface({ isOpen, onClose, onProductSelect }: Chat
         </div>
         
         <div className="p-6 border-t border-gray-200">
-          {/* Quick Action Buttons */}
-          <div className="mb-4">
-            <p className="text-sm font-medium text-gray-700 mb-3">🚀 Perintah Cepat:</p>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 mb-4">
-              {/* Kategori Pulsa */}
+          {/* Dropdown Interface */}
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium text-gray-700 mb-2 block">
+                🛒 Pilih Jenis Produk:
+              </label>
+              <Select value={selectedCommand} onValueChange={setSelectedCommand}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Pilih produk yang ingin dibeli..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Beli pulsa Telkomsel 10rb">📱 Pulsa Telkomsel 10.000</SelectItem>
+                  <SelectItem value="Beli pulsa Telkomsel 25rb">📱 Pulsa Telkomsel 25.000</SelectItem>
+                  <SelectItem value="Beli pulsa Telkomsel 50rb">📱 Pulsa Telkomsel 50.000</SelectItem>
+                  <SelectItem value="Beli pulsa Telkomsel 100rb">📱 Pulsa Telkomsel 100.000</SelectItem>
+                  
+                  <SelectItem value="Beli pulsa Indosat 10rb">📱 Pulsa Indosat 10.000</SelectItem>
+                  <SelectItem value="Beli pulsa Indosat 25rb">📱 Pulsa Indosat 25.000</SelectItem>
+                  <SelectItem value="Beli pulsa Indosat 50rb">📱 Pulsa Indosat 50.000</SelectItem>
+                  
+                  <SelectItem value="Beli pulsa XL 10rb">📱 Pulsa XL 10.000</SelectItem>
+                  <SelectItem value="Beli pulsa XL 25rb">📱 Pulsa XL 25.000</SelectItem>
+                  <SelectItem value="Beli pulsa XL 50rb">📱 Pulsa XL 50.000</SelectItem>
+                  
+                  <SelectItem value="Beli pulsa Tri 5rb">📱 Pulsa Tri 5.000</SelectItem>
+                  <SelectItem value="Beli pulsa Tri 10rb">📱 Pulsa Tri 10.000</SelectItem>
+                  <SelectItem value="Beli pulsa Tri 25rb">📱 Pulsa Tri 25.000</SelectItem>
+                  
+                  <SelectItem value="Beli data Telkomsel 1GB">📶 Data Telkomsel 1GB</SelectItem>
+                  <SelectItem value="Beli data Telkomsel 3GB">📶 Data Telkomsel 3GB</SelectItem>
+                  <SelectItem value="Beli data Telkomsel 8GB">📶 Data Telkomsel 8GB</SelectItem>
+                  
+                  <SelectItem value="Beli token PLN 20rb">⚡ Token PLN 20.000</SelectItem>
+                  <SelectItem value="Beli token PLN 50rb">⚡ Token PLN 50.000</SelectItem>
+                  <SelectItem value="Beli token PLN 100rb">⚡ Token PLN 100.000</SelectItem>
+                  
+                  <SelectItem value="Beli diamond Mobile Legends 86">🎮 Mobile Legends 86 Diamond</SelectItem>
+                  <SelectItem value="Beli diamond Mobile Legends 172">🎮 Mobile Legends 172 Diamond</SelectItem>
+                  <SelectItem value="Beli diamond Free Fire 70">🎮 Free Fire 70 Diamond</SelectItem>
+                  
+                  <SelectItem value="Beli GoPay 50rb">💳 GoPay 50.000</SelectItem>
+                  <SelectItem value="Beli GoPay 100rb">💳 GoPay 100.000</SelectItem>
+                  <SelectItem value="Beli OVO 50rb">💳 OVO 50.000</SelectItem>
+                  <SelectItem value="Beli DANA 50rb">💳 DANA 50.000</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-gray-700 mb-2 block">
+                📱 Nomor Tujuan:
+              </label>
+              <Input
+                value={customNumber}
+                onChange={(e) => setCustomNumber(e.target.value)}
+                placeholder="Masukkan nomor HP/ID tujuan (contoh: 081234567890)"
+                className="w-full"
+                disabled={processChatMutation.isPending}
+              />
+            </div>
+
+            <Button 
+              onClick={handleDropdownCommand}
+              disabled={!selectedCommand || !customNumber.trim() || processChatMutation.isPending}
+              className="w-full bg-primary hover:bg-blue-700"
+            >
+              <Send className="h-4 w-4 mr-2" />
+              Proses Transaksi
+            </Button>
+          </div>
+
+          {/* Tambahan: Tombol Quick Browse */}
+          <div className="mt-4 pt-4 border-t border-gray-100">
+            <p className="text-xs text-gray-500 mb-2">Atau lihat semua produk tersedia:</p>
+            <div className="grid grid-cols-3 gap-2">
               <Button
                 size="sm"
                 variant="outline"
-                className="text-xs h-8 justify-start"
-                onClick={() => handleQuickAction("List pulsa Telkomsel")}
+                className="text-xs h-7"
+                onClick={() => handleQuickAction("List semua pulsa")}
                 disabled={processChatMutation.isPending}
               >
-                📱 Pulsa Telkomsel
+                📱 Semua Pulsa
               </Button>
               <Button
                 size="sm"
                 variant="outline"
-                className="text-xs h-8 justify-start"
-                onClick={() => handleQuickAction("List pulsa Indosat")}
+                className="text-xs h-7"
+                onClick={() => handleQuickAction("List semua data")}
                 disabled={processChatMutation.isPending}
               >
-                📱 Pulsa Indosat
+                📶 Semua Data
               </Button>
               <Button
                 size="sm"
                 variant="outline"
-                className="text-xs h-8 justify-start"
-                onClick={() => handleQuickAction("List pulsa XL")}
-                disabled={processChatMutation.isPending}
-              >
-                📱 Pulsa XL
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                className="text-xs h-8 justify-start"
-                onClick={() => handleQuickAction("List pulsa Tri")}
-                disabled={processChatMutation.isPending}
-              >
-                📱 Pulsa Tri
-              </Button>
-              
-              {/* Kategori Data */}
-              <Button
-                size="sm"
-                variant="outline"
-                className="text-xs h-8 justify-start"
-                onClick={() => handleQuickAction("List data Telkomsel")}
-                disabled={processChatMutation.isPending}
-              >
-                📶 Data Telkomsel
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                className="text-xs h-8 justify-start"
-                onClick={() => handleQuickAction("List data Indosat")}
-                disabled={processChatMutation.isPending}
-              >
-                📶 Data Indosat
-              </Button>
-              
-              {/* Kategori Games & Voucher */}
-              <Button
-                size="sm"
-                variant="outline"
-                className="text-xs h-8 justify-start"
-                onClick={() => handleQuickAction("List games")}
+                className="text-xs h-7"
+                onClick={() => handleQuickAction("List semua games")}
                 disabled={processChatMutation.isPending}
               >
                 🎮 Games
               </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                className="text-xs h-8 justify-start"
-                onClick={() => handleQuickAction("List voucher")}
-                disabled={processChatMutation.isPending}
-              >
-                🎫 Voucher
-              </Button>
-              
-              {/* Kategori E-Money & PLN */}
-              <Button
-                size="sm"
-                variant="outline"
-                className="text-xs h-8 justify-start"
-                onClick={() => handleQuickAction("List E-Money")}
-                disabled={processChatMutation.isPending}
-              >
-                💳 E-Money
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                className="text-xs h-8 justify-start"
-                onClick={() => handleQuickAction("List PLN")}
-                disabled={processChatMutation.isPending}
-              >
-                ⚡ PLN
-              </Button>
-              
-              {/* Paket SMS & Telpon + Streaming */}
-              <Button
-                size="sm"
-                variant="outline"
-                className="text-xs h-8 justify-start"
-                onClick={() => handleQuickAction("List Paket SMS & Telpon")}
-                disabled={processChatMutation.isPending}
-              >
-                📞 SMS & Telpon
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                className="text-xs h-8 justify-start"
-                onClick={() => handleQuickAction("List Streaming")}
-                disabled={processChatMutation.isPending}
-              >
-                📺 Streaming
-              </Button>
             </div>
-          </div>
-
-          {/* Manual Input */}
-          <div className="flex items-center space-x-3">
-            <Input
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="Atau ketik perintah manual: Beli pulsa Telkomsel 50rb untuk 081234567890"
-              className="flex-1"
-              disabled={processChatMutation.isPending}
-            />
-            <Button 
-              onClick={handleSendMessage}
-              disabled={!input.trim() || processChatMutation.isPending}
-              className="bg-primary hover:bg-blue-700"
-            >
-              <Send className="h-4 w-4" />
-            </Button>
           </div>
         </div>
       </DialogContent>

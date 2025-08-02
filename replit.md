@@ -5,6 +5,7 @@ This is a PPOB (Payment Point Online Bank) platform with AI-powered transaction 
 # User Preferences
 
 Preferred communication style: Simple, everyday language.
+UI preferences: User requested dropdown interface for AI chat instead of manual text input.
 
 # Recent Changes
 
