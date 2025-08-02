@@ -375,42 +375,6 @@ export default function ChatInterface({ isOpen, onClose, onProductSelect }: Chat
             <div ref={messagesEndRef} />
           </div>
         </div>
-        
-        <div className="p-6 border-t border-gray-200">
-          {/* Tambahan: Tombol Quick Browse */}
-          <div className="mb-3">
-            <p className="text-xs text-gray-500 mb-2">Lihat katalog produk lengkap:</p>
-            <div className="grid grid-cols-3 gap-2">
-              <Button
-                size="sm"
-                variant="outline"
-                className="text-xs h-7"
-                onClick={() => handleQuickAction("List semua pulsa")}
-                disabled={processChatMutation.isPending}
-              >
-                📱 Semua Pulsa
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                className="text-xs h-7"
-                onClick={() => handleQuickAction("List semua data")}
-                disabled={processChatMutation.isPending}
-              >
-                📶 Semua Data
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                className="text-xs h-7"
-                onClick={() => handleQuickAction("List semua games")}
-                disabled={processChatMutation.isPending}
-              >
-                🎮 Games
-              </Button>
-            </div>
-          </div>
-        </div>
       </DialogContent>
     </Dialog>
   );
