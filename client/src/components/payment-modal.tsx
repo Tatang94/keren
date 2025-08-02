@@ -48,13 +48,16 @@ export default function PaymentModal({ isOpen, onClose, paymentData }: PaymentMo
     if (!paymentData) return;
 
     const transactionData = {
+      productId: paymentData.productId || paymentData.productName.replace(/\s+/g, '-').toLowerCase(),
       productType: getProductType(paymentData.productName),
+      productCategory: getProductType(paymentData.productName),
       productName: paymentData.productName,
       targetNumber: paymentData.targetNumber,
       amount: paymentData.amount,
       adminFee: paymentData.adminFee,
       totalAmount: paymentData.totalAmount,
       status: 'pending',
+      digiflazzSku: paymentData.digiflazzSku || null,
       aiCommand: `Beli ${paymentData.productName} untuk ${paymentData.targetNumber}`
     };
 

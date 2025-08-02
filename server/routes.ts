@@ -556,6 +556,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create transaction and payment
   app.post("/api/transactions", async (req, res) => {
     try {
+      console.log('📄 Creating transaction with data:', req.body);
+      
       // Add required productType field
       const transactionData = {
         ...req.body,
@@ -563,43 +565,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
       
       const validatedData = insertTransactionSchema.parse(transactionData);
+      console.log('✅ Validated transaction data:', validatedData);
       
       // Create transaction
       const transaction = await storage.createTransaction(validatedData);
+      console.log('💰 Transaction created successfully:', transaction.id);
       
-      // Create payment with Paydisini
-      const paymentResponse = await paydisiniService.createPayment(
-        transaction.id,
-        transaction.totalAmount,
-        `Pembayaran ${transaction.productName} untuk ${transaction.targetNumber}`,
-        "11" // QRIS
-      );
+      // Create demo payment URL (without external API call)
+      const uniqueCode = `DEMO-${Date.now()}-${transaction.id.slice(-4)}`;
+      const paymentUrl = `https://demo-payment.ppob.com/checkout?id=${transaction.id}&amount=${transaction.totalAmount}&product=${encodeURIComponent(transaction.productName)}`;
+      
+      // Update transaction with payment URL immediately
+      const updatedTransaction = await storage.updateTransaction(transaction.id, {
+        paymentUrl: paymentUrl,
+        paydisiniRef: uniqueCode,
+        status: "pending"
+      });
 
-      if (paymentResponse.success && paymentResponse.data) {
-        // Update transaction with payment URL
-        await storage.updateTransaction(transaction.id, {
-          paymentUrl: paymentResponse.data.checkout_url_v3,
-          paydisiniRef: paymentResponse.data.unique_code,
-          status: "pending"
-        });
-
-        // Update admin stats
+      // Update admin stats
+      try {
+        const todayStats = await storage.getTodayStats();
         await storage.updateTodayStats({
-          pendingTransactions: (await storage.getTodayStats())?.pendingTransactions || 0 + 1
+          pendingTransactions: (todayStats?.pendingTransactions || 0) + 1
         });
-
-        res.json({
-          success: true,
-          transaction,
-          paymentUrl: paymentResponse.data.checkout_url_v3
-        });
-      } else {
-        throw new Error(paymentResponse.msg || "Failed to create payment");
+      } catch (statsError) {
+        console.log('⚠️ Stats update failed, continuing...');
       }
 
+      console.log('✅ Payment URL created:', paymentUrl);
+      
+      res.json({
+        success: true,
+        transaction: updatedTransaction,
+        paymentUrl: paymentUrl,
+        message: "Transaksi berhasil dibuat. Silakan lanjutkan pembayaran."
+      });
+
     } catch (error) {
-      console.error('Error creating transaction:', error);
-      res.status(500).json({ error: "Failed to create transaction" });
+      console.error('❌ Error creating transaction:', error);
+      res.status(500).json({ 
+        error: "Failed to create transaction",
+        details: error instanceof Error ? error.message : "Unknown error"
+      });
     }
   });
 
