@@ -5,7 +5,7 @@ import { z } from "zod";
 
 export const transactions = pgTable("transactions", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  productType: text("product_type").notNull(), // pulsa, token_listrik, game_voucher, ewallet
+  productType: text("product_type").notNull(), // pulsa, token_listrik, game_voucher, ewallet, tv_streaming
   productName: text("product_name").notNull(),
   targetNumber: text("target_number").notNull(),
   amount: integer("amount").notNull(),
@@ -22,7 +22,7 @@ export const transactions = pgTable("transactions", {
 
 export const products = pgTable("products", {
   id: varchar("id").primaryKey(),
-  category: text("category").notNull(), // pulsa, token_listrik, game_voucher, ewallet
+  category: text("category").notNull(), // pulsa, token_listrik, game_voucher, ewallet, tv_streaming
   provider: text("provider").notNull(), // telkomsel, indosat, xl, pln, etc
   name: text("name").notNull(),
   price: integer("price").notNull(),

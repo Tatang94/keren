@@ -111,39 +111,48 @@ export class MemStorage implements IStorage {
   }
 
   private mapDigiflazzCategory(dfCategory: string): string {
+    // Mapping berdasarkan kategori sebenarnya dari API Digiflazz
     const categoryMap: Record<string, string> = {
       'Pulsa': 'pulsa',
-      'Paket Data': 'pulsa',
-      'PLN': 'token_listrik',
-      'Token Listrik': 'token_listrik',
-      'Games': 'game_voucher',
-      'Voucher Game': 'game_voucher',
+      'Data': 'pulsa', // Paket data masuk kategori pulsa
       'E-Money': 'ewallet',
-      'E-Wallet': 'ewallet',
-      'PDAM': 'tagihan',
-      'Multifinance': 'tagihan'
+      'Voucher': 'game_voucher',
+      'Aktivasi Voucher': 'game_voucher',
+      'Paket SMS & Telpon': 'pulsa',
+      'Games': 'game_voucher',
+      'TV': 'tv_streaming',
+      'PLN': 'token_listrik',
+      'eSIM': 'pulsa'
     };
     return categoryMap[dfCategory] || 'pulsa';
   }
 
   private mapDigiflazzBrand(dfBrand: string): string {
+    // Mapping berdasarkan brand sebenarnya dari API Digiflazz
     const brandMap: Record<string, string> = {
       'TELKOMSEL': 'telkomsel',
       'INDOSAT': 'indosat',
-      'XL AXIATA': 'xl',
+      'XL': 'xl',
       'TRI': 'tri',
       'SMARTFREN': 'smartfren',
       'AXIS': 'axis',
+      'by.U': 'byu',
       'PLN': 'pln',
-      'MOBILE LEGENDS': 'mobile_legends',
       'FREE FIRE': 'free_fire',
       'PUBG MOBILE': 'pubg',
-      'GOPAY': 'gopay',
+      'Call of Duty MOBILE': 'cod_mobile',
+      'GOOGLE PLAY INDONESIA': 'google_play',
+      'Minecraft': 'minecraft',
+      'Mango Live': 'mango_live',
       'OVO': 'ovo',
       'DANA': 'dana',
-      'SHOPEEPAY': 'shopeepay'
+      'GRAB': 'grab',
+      'TAPCASH BNI': 'tapcash',
+      'MANDIRI E-TOLL': 'mandiri_etoll',
+      'BRI BRIZZI': 'brizzi',
+      'INDOMARET': 'indomaret'
     };
-    return brandMap[dfBrand.toUpperCase()] || dfBrand.toLowerCase();
+    return brandMap[dfBrand.toUpperCase()] || dfBrand.toLowerCase().replace(/\s+/g, '_');
   }
 
   private calculateAdminFee(price: number): number {

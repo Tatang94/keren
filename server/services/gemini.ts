@@ -23,7 +23,7 @@ PENTING: Hanya proses perintah yang berkaitan dengan pembelian produk digital se
 Jika pertanyaan BUKAN tentang pembelian produk digital PPOB, return dengan confidence: 0.
 
 Analisis perintah pembelian dan ekstrak:
-- productType: "pulsa", "token_listrik", "game_voucher", atau "ewallet"
+- productType: "pulsa", "token_listrik", "game_voucher", "ewallet", atau "tv_streaming"
 - provider: nama provider
 - amount: nominal dalam rupiah (konversi "rb"/"ribu" ke angka penuh)
 - targetNumber: nomor HP/ID pelanggan/nomor meter

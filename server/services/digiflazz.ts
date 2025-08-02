@@ -70,6 +70,9 @@ export class DigiflazzService {
       }
 
       const data = await response.json();
+      
+
+      
       return data.data || [];
     } catch (error) {
       console.error('Error fetching Digiflazz products:', error);
@@ -79,12 +82,13 @@ export class DigiflazzService {
 
   async findProduct(productType: string, provider: string, amount: number): Promise<string | null> {
     try {
-      // Map internal product types to Digiflazz categories
+      // Map internal product types to Digiflazz categories (sesuai API)
       const categoryMap: Record<string, string> = {
         'pulsa': 'Pulsa',
         'token_listrik': 'PLN',
         'game_voucher': 'Games',
-        'ewallet': 'E-Money'
+        'ewallet': 'E-Money',
+        'tv_streaming': 'TV'
       };
 
       const category = categoryMap[productType];
