@@ -5,8 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import ChatInterface from "@/components/chat-interface";
 
 import PaymentModal from "@/components/payment-modal";
-import { Bot, Settings, MessageCircle, ShoppingCart } from "lucide-react";
-import { Link } from "wouter";
+import { Bot, MessageCircle, ShoppingCart } from "lucide-react";
 
 export default function Home() {
   const [showChat, setShowChat] = useState(false);
@@ -43,12 +42,6 @@ export default function Home() {
                 <Bot className="mr-2 h-4 w-4" />
                 Chat AI
               </Button>
-              <Link href="/admin">
-                <Button variant="outline" size="sm">
-                  <Settings className="mr-2 h-4 w-4" />
-                  Admin
-                </Button>
-              </Link>
             </div>
           </div>
         </div>
